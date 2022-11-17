@@ -12,7 +12,7 @@ public class MangroveSurfaceBuilder {//extends SurfaceBuilder<SurfaceBuilderBase
 //    }
 //
 //    @Override
-//    public void apply(Random random, ChunkAccess chunk, Biome biome, int x, int z, int startHeight, double noise, BlockState defaultBlock, BlockState defaultFluid, int seaLevel, int pMinSurfaceLevel, long seed, SurfaceBuilderBaseConfiguration config) {
+//    public void apply(RandomSource random, ChunkAccess chunk, Biome biome, int x, int z, int startHeight, double noise, BlockState defaultBlock, BlockState defaultFluid, int seaLevel, int pMinSurfaceLevel, long seed, SurfaceBuilderBaseConfiguration config) {
 //        double streamNoise = this.streamNoise.getValue(x * 0.025, z * 0.025, false);
 //        double mudNoise = this.mudNoise.getValue(x * 0.03125, z * 0.03125, false);
 //        boolean muddy = mudNoise > -0.1;
@@ -48,7 +48,7 @@ public class MangroveSurfaceBuilder {//extends SurfaceBuilder<SurfaceBuilderBase
 //    @Override
 //    public void initNoise(long seed) {
 //        if (this.seed != seed || this.mudNoise == null) {
-//            WorldgenRandom random = new WorldgenRandom(seed);
+//            WorldgenRandomSource random = new WorldgenRandom(seed);
 //            this.mudNoise = new PerlinSimplexNoise(random, IntStream.rangeClosed(0, 2));
 //            this.streamNoise = new PerlinSimplexNoise(random, IntStream.rangeClosed(0, 2));
 //        }

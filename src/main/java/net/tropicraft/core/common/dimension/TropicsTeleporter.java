@@ -381,7 +381,7 @@ public class TropicsTeleporter implements ITeleporter {
                 ChunkPos columnPos = new ChunkPos(entry.getLongKey());
                 DimensionType dimension = this.world.getLevel().dimensionType();
                 LOGGER.debug("Removing tropics portal ticket for {}:{}", dimension, columnPos);
-                this.world.getChunkSource().registerTickingTicket(TicketType.PORTAL, columnPos, 3, position.pos);
+                this.world.getChunkSource().addRegionTicket(TicketType.PORTAL, columnPos, 3, position.pos);
                 iterator.remove();
             }
         }

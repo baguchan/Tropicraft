@@ -3,8 +3,9 @@ package net.tropicraft.core.common.dimension.feature.tree;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.LevelSimulatedRW;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelWriter;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SaplingBlock;
@@ -14,7 +15,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 import net.tropicraft.core.common.block.TropicraftBlocks;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 public abstract class RainforestTreeFeature extends Feature<NoneFeatureConfiguration> {
 
@@ -45,19 +45,19 @@ public abstract class RainforestTreeFeature extends Feature<NoneFeatureConfigura
         return TropicraftBlocks.MAHOGANY_LOG.get().defaultBlockState();
     }
 
-    protected void placeLeaf(final LevelSimulatedRW world, int x, int y, int z) {
+    protected void placeLeaf(final WorldGenLevel world, int x, int y, int z) {
         setState(world, new BlockPos(x, y, z), getLeaf());
     }
 
-    protected void placeLog(final LevelSimulatedRW world, int x, int y, int z) {
+    protected void placeLog(final WorldGenLevel world, int x, int y, int z) {
         setState(world, new BlockPos(x, y, z), getLog());
     }
 
-    protected boolean genCircle(LevelSimulatedRW world, int x, int y, int z, double outerRadius, double innerRadius, BlockState state, boolean solid) {
+    protected boolean genCircle(WorldGenLevel world, int x, int y, int z, double outerRadius, double innerRadius, BlockState state, boolean solid) {
         return genCircle(world, new BlockPos(x, y, z), outerRadius, innerRadius, state, solid);
     }
 
-    protected boolean genVines(final LevelSimulatedRW world, final Random rand, int i, int j, int k) {
+    protected boolean genVines(final WorldGenLevel world, final RandomSource rand, int i, int j, int k) {
         int m = 2;
 
         do {
@@ -66,7 +66,7 @@ public abstract class RainforestTreeFeature extends Feature<NoneFeatureConfigura
             }
 
             final BlockPos pos = new BlockPos(i, j, k);
-            if (isAir(world, pos)) {
+            if (world.isEmptyBlock(pos)) {
                 setBlockStateInternally(world, pos, Blocks.VINE.defaultBlockState());
                 break;
             }
@@ -78,7 +78,7 @@ public abstract class RainforestTreeFeature extends Feature<NoneFeatureConfigura
 
         for (int y = j - 1; y > j - length; y--) {
             final BlockPos vinePos = new BlockPos(i, y, k);
-            if (isAir(world, vinePos)) {
+            if (world.isEmptyBlock(vinePos)) {
                 setBlockStateInternally(world, vinePos, Blocks.VINE.defaultBlockState());
             } else {
                 return true;
@@ -90,12 +90,13 @@ public abstract class RainforestTreeFeature extends Feature<NoneFeatureConfigura
 
     /**
      * Places a line from coords ai to coords ai1
-     * @param ai One end of the line
-     * @param ai1 The other end of the line
+     *
+     * @param ai    One end of the line
+     * @param ai1   The other end of the line
      * @param state IBlockState to place
      * @return The coords that blocks were placed on
      */
-    public ArrayList<int[]> placeBlockLine(LevelSimulatedRW world, int ai[], int ai1[], BlockState state) {
+    public ArrayList<int[]> placeBlockLine(WorldGenLevel world, int ai[], int ai1[], BlockState state) {
         ArrayList<int[]> places = new ArrayList<>();
         int[] ai2 = {0, 0, 0};
         byte byte0 = 0;
@@ -138,25 +139,26 @@ public abstract class RainforestTreeFeature extends Feature<NoneFeatureConfigura
 
     /**
      * Generates a circle
-     * @param world World object
-     * @param pos Coordinates of the center of the circle
+     *
+     * @param world       World object
+     * @param pos         Coordinates of the center of the circle
      * @param outerRadius The radius of the circle's outside edge
      * @param innerRadius The radius of the circle's inner edge, 0 for a full circle
-     * @param state BlockState to generate
-     * @param solid Whether it should place the block if another block is already occupying that space
+     * @param state       BlockState to generate
+     * @param solid       Whether it should place the block if another block is already occupying that space
      */
-    public boolean genCircle(LevelSimulatedRW world, BlockPos pos, double outerRadius, double innerRadius, BlockState state, boolean solid) {
+    public boolean genCircle(WorldGenLevel world, BlockPos pos, double outerRadius, double innerRadius, BlockState state, boolean solid) {
         int x = pos.getX();
         int y = pos.getY();
         int z = pos.getZ();
 
         boolean hasGenned = false;
-        for (int i = (int)(-outerRadius - 1) + x; i <= (int)(outerRadius + 1) + x; i++) {
-            for (int k = (int)(-outerRadius - 1) + z; k <= (int)(outerRadius + 1) + z; k++) {
+        for (int i = (int) (-outerRadius - 1) + x; i <= (int) (outerRadius + 1) + x; i++) {
+            for (int k = (int) (-outerRadius - 1) + z; k <= (int) (outerRadius + 1) + z; k++) {
                 double d = (i - x) * (i - x) + (k - z) * (k - z);
                 if (d <= outerRadius * outerRadius && d >= innerRadius * innerRadius) {
                     BlockPos pos2 = new BlockPos(i, y, k);
-                    if (isAir(world, pos2) || solid) {
+                    if (world.isEmptyBlock(pos2) || solid) {
                         if (world.setBlock(pos2, state, Block.UPDATE_ALL)) {
                             hasGenned = true;
                         }

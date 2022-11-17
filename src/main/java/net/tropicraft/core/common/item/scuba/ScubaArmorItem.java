@@ -15,11 +15,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.IItemRenderProperties;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.tropicraft.Constants;
 import net.tropicraft.core.client.scuba.ModelScubaGear;
 import net.tropicraft.core.common.item.ArmorMaterials;
 import net.tropicraft.core.common.item.TropicraftArmorItem;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
@@ -67,23 +68,21 @@ public class ScubaArmorItem extends TropicraftArmorItem {
         return new ResourceLocation(Constants.ARMOR_LOCATION + "scuba_gear_" + material.getTextureName() + ".png");
     }
 
-    @Override
-    public void initializeClient(Consumer<IItemRenderProperties> consumer) {
-        consumer.accept(new IItemRenderProperties() {
+	@Override
+	public void initializeClient(Consumer<IClientItemExtensions> consumer) {
+		consumer.accept(new IClientItemExtensions() {
+			@Override
+			public @NotNull HumanoidModel<?> getHumanoidArmorModel(LivingEntity entity, ItemStack item, EquipmentSlot armorSlot, HumanoidModel<?> _default) {
+				if (item.isEmpty()) {
+					return null;
+				}
 
-            @Nullable
-            @Override
-            public HumanoidModel<?> getArmorModel(LivingEntity entity, ItemStack item, EquipmentSlot armorSlot, HumanoidModel<?> _default) {
-                if (item.isEmpty()) {
-                    return null;
-                }
-
-                HumanoidModel<?> armorModel = getArmorModel(armorSlot);
-                if (armorModel != null) {
-                    prepareModel(armorModel, entity);
-                    return armorModel;
-                } else {
-                    return null;
+				HumanoidModel<?> armorModel = getArmorModel(armorSlot);
+				if (armorModel != null) {
+					prepareModel(armorModel, entity);
+					return armorModel;
+				} else {
+					return null;
                 }
             }
 

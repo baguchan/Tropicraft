@@ -1,7 +1,7 @@
 package net.tropicraft.core.common.entity.underdasea;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -16,7 +16,11 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
-import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.BreathAirGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.RandomSwimmingGoal;
+import net.minecraft.world.entity.ai.goal.TryFindWaterGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.animal.WaterAnimal;
@@ -25,15 +29,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.HitResult;
-import net.tropicraft.core.common.entity.ai.fishies.AvoidWallsGoal;
-import net.tropicraft.core.common.entity.ai.fishies.RandomSwimGoal;
-import net.tropicraft.core.common.entity.ai.fishies.SwimToAvoidEntityGoal;
-import net.tropicraft.core.common.entity.ai.fishies.TargetPreyGoal;
 import net.tropicraft.core.common.item.TropicraftItems;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 
 public class SharkEntity extends WaterAnimal {
 
@@ -101,13 +100,13 @@ public class SharkEntity extends WaterAnimal {
     private void setBossTraits() {
         getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(8);
         //TODO this.setDropStack(ItemRegistry.yellowFlippers, 1);
-        setCustomName(new TextComponent("Elder Hammerhead"));
+        setCustomName(Component.literal("Elder Hammerhead"));
         setCustomNameVisible(true);
 //        setSwimSpeeds(1.1f, 2.2f, 1.5f, 3f, 5f);
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(20);
         // TODO in renderer - this.setTexture("hammerhead4");
         if (!level.isClientSide) {
-            bossInfo.setName(new TextComponent("Elder Hammerhead"));
+            bossInfo.setName(Component.literal("Elder Hammerhead"));
         }
         hasSetBoss = true;
     }

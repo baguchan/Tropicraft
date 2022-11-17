@@ -1,18 +1,10 @@
 package net.tropicraft.core.common.dimension.chunk;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.minecraft.ChatFormatting;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -21,8 +13,6 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.tropicraft.Constants;
 import net.tropicraft.core.common.block.TropicraftBlocks;
@@ -76,41 +66,6 @@ public class VolcanoGenerator {
         this.worldSeed = worldSeed;
         this.biomeSource = biomeSource;
         this.chunkGenerator = chunkGenerator;
-    }
-
-    @SubscribeEvent
-    public static void onServerStarting(ServerStartingEvent event) {
-        // we don't really have a structure but we fake it
-        CommandDispatcher<CommandSourceStack> dispatcher = event.getServer().getCommands().getDispatcher();
-
-        LiteralArgumentBuilder<CommandSourceStack> locate = Commands.literal("locate").requires(source -> source.hasPermission(2));
-        dispatcher.register(
-                locate.then(Commands.literal(Constants.MODID + ":volcano")
-                        .executes(ctx -> {
-                            CommandSourceStack source = ctx.getSource();
-                            BlockPos pos = new BlockPos(source.getPosition());
-
-                            ChunkGenerator generator = source.getLevel().getChunkSource().getGenerator();
-                            if (!(generator instanceof TropicraftChunkGenerator tropicsGenerator)) {
-                                throw new SimpleCommandExceptionType(new TranslatableComponent("commands.locate.failed")).create();
-                            }
-
-                            VolcanoGenerator volcanoGen = tropicsGenerator.getVolcano();
-
-                            BlockPos volcanoPos = volcanoGen.getVolcanoNear(source.getLevel(), pos.getX() >> 4, pos.getZ() >> 4, 100);
-                            if (volcanoPos == null) {
-                                throw new SimpleCommandExceptionType(new TranslatableComponent("commands.locate.failed")).create();
-                            } else {
-                                int i = Mth.floor(dist(volcanoPos.getX(), volcanoPos.getZ(), pos.getX(), pos.getZ()));
-                                Component component = ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("chat.coordinates", volcanoPos.getX(), "~", volcanoPos.getZ())).withStyle((p_207527_) -> {
-                                    return p_207527_.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + volcanoPos.getX() + " ~ " + volcanoPos.getZ())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("chat.coordinates.tooltip")));
-                                });
-                                source.sendSuccess(new TranslatableComponent("commands.locate.success", "Volcano", component, i), false);
-
-                                return i;
-                            }
-                        }))
-        );
     }
 
     private static float dist(int pX1, int pZ1, int pX2, int pZ2) {
@@ -307,22 +262,23 @@ public class VolcanoGenerator {
             chunkZ -= numChunks - 1;
         }
 
+        Random rand = new Random(worldSeed);
+
         int randX = chunkX / numChunks;
         int randZ = chunkZ / numChunks;
         long seed = (long) randX * 341873128712L + (long) randZ * 132897987541L + worldSeed + (long) 4291726;
-        Random rand = new Random(seed);
         randX *= numChunks;
         randZ *= numChunks;
         randX += rand.nextInt(numChunks - offsetChunks);
         randZ += rand.nextInt(numChunks - offsetChunks);
 
         if (oldi == randX && oldj == randZ) {
-            if (hasAllBiomes(biomeSource, oldi * 16 + 8, 0, oldj * 16 + 8, volcanoSpawnBiomesLand)) {
+            /*if (hasAllBiomes(biomeSource, oldi * 16 + 8, 0, oldj * 16 + 8, volcanoSpawnBiomesLand)) {
                 return SURFACE_BIOME;
             }
             if (hasAllBiomes(biomeSource, oldi * 16 + 8, 0, oldj * 16 + 8, volcanoSpawnBiomesOcean)) {
                 return OCEAN_BIOME;
-            }
+            }*/
 
             return SURFACE_BIOME;
         }
@@ -372,8 +328,4 @@ public class VolcanoGenerator {
         return biome == SURFACE_BIOME ? 0 : OCEAN_HEIGHT_OFFSET;
     }
 
-    private boolean hasAllBiomes(BiomeSource biomeSource, int centerX, int centerY, int centerZ, Set<ResourceLocation> allowedBiomes) {
-        Biome biome = biomeSource.getNoiseBiome(centerX >> 2, centerY >> 2, centerZ >> 2, this.chunkGenerator.climateSampler()).value();
-        return allowedBiomes.contains(biome.getRegistryName());
-    }
 }

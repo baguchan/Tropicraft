@@ -3,7 +3,6 @@ package net.tropicraft.core.client.scuba;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -56,7 +55,7 @@ public class ScubaAmbienceTicker {
         if (currentSound != sound) {
             stop();
             currentSound = sound;
-            Minecraft.getInstance().getSoundManager().play(new SimpleSoundInstance(sound.getLocation(), SoundSource.AMBIENT, 0.4f, 1.0f, true, 0, SoundInstance.Attenuation.NONE, 0.0F, 0.0F, 0.0F, true));
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forLocalAmbience(sound, 0.4f, 1.0f));
         }
     }
     

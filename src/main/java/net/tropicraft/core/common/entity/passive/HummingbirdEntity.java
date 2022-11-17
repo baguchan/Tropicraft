@@ -5,8 +5,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
@@ -39,7 +44,6 @@ import net.tropicraft.core.common.item.TropicraftItems;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
-import java.util.Random;
 
 public class HummingbirdEntity extends Animal implements FlyingAnimal {
     private static final Direction[] HORIZONTALS = new Direction[] { Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST };
@@ -85,7 +89,7 @@ public class HummingbirdEntity extends Animal implements FlyingAnimal {
         this.goalSelector.addGoal(5, new FlyAroundRandomlyGoal());
     }
 
-    public static boolean canHummingbirdSpawnOn(EntityType<HummingbirdEntity> type, LevelAccessor world, MobSpawnType reason, BlockPos pos, Random random) {
+    public static boolean canHummingbirdSpawnOn(EntityType<HummingbirdEntity> type, LevelAccessor world, MobSpawnType reason, BlockPos pos, RandomSource random) {
         BlockState groundState = world.getBlockState(pos.below());
         return (groundState.is(BlockTags.LEAVES) || groundState.is(Blocks.GRASS_BLOCK) || groundState.isAir())
                 && world.getRawBrightness(pos, 0) > 8;
@@ -231,7 +235,7 @@ public class HummingbirdEntity extends Animal implements FlyingAnimal {
         Vec3 generateTarget() {
             HummingbirdEntity bird = HummingbirdEntity.this;
             Level world = bird.level;
-            Random random = bird.random;
+            RandomSource random = bird.random;
 
             BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 

@@ -6,7 +6,7 @@ public class UnderwaterSurfaceBuilder {// extends SurfaceBuilder<UnderwaterSurfa
 //    }
 //
 //    @Override
-//    public void apply(Random random, ChunkAccess chunk, Biome biome, int x, int z, int startHeight, double noise, BlockState defaultBlock, BlockState defaultFluid, int seaLevel, int minSurfaceLevel, long seed, Config config) {
+//    public void apply(RandomSource random, ChunkAccess chunk, Biome biome, int x, int z, int startHeight, double noise, BlockState defaultBlock, BlockState defaultFluid, int seaLevel, int minSurfaceLevel, long seed, Config config) {
 //        SurfaceBuilderBaseConfiguration selectedConfig = config.beach;
 //        if (startHeight > seaLevel + 5) {
 //            selectedConfig = config.land;

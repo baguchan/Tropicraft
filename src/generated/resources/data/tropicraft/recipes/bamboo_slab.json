@@ -1,15 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "XXX"
-  ],
   "key": {
     "X": {
       "item": "tropicraft:bamboo_bundle"
     }
   },
+  "pattern": [
+    "XXX"
+  ],
   "result": {
-    "item": "tropicraft:bamboo_slab",
-    "count": 6
+    "count": 6,
+    "item": "tropicraft:bamboo_slab"
   }
 }

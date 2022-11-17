@@ -3,7 +3,6 @@ package net.tropicraft.core.common.item;
 import com.google.common.collect.Maps;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.tropicraft.Constants;
 import org.apache.commons.lang3.ArrayUtils;
@@ -46,6 +45,6 @@ public class LoveTropicsShellItem extends ShellItem implements IColoredItem {
         }
         final String name = stack.getTag().getString("Name");
         final String type = name.endsWith("s") ? "with_s" : "normal";
-        return new TranslatableComponent("item.tropicraft.shell.owned." + type, name);
+        return Component.translatable("item.tropicraft.shell.owned." + type, name);
     }
 }

@@ -8,7 +8,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -17,20 +18,17 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.LegacyRandomSource;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElementType;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.tropicraft.Constants;
 import net.tropicraft.core.common.block.TropicraftBlocks;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
 
 public final class HomeTreeBranchPiece extends StructurePoolElement implements PieceWithGenerationBounds {
@@ -70,68 +68,6 @@ public final class HomeTreeBranchPiece extends StructurePoolElement implements P
         nbt.putString("target", "minecraft:empty");
         nbt.putString("joint", JigsawBlockEntity.JointType.ROLLABLE.getSerializedName());
         return nbt;
-    }
-
-    @Override
-    public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(StructureManager templates, BlockPos pos, Rotation rotation, Random random) {
-        FrontAndTop orientation = FrontAndTop.fromFrontAndTop(Direction.DOWN, Direction.SOUTH);
-        BlockState state = Blocks.JIGSAW.defaultBlockState().setValue(JigsawBlock.ORIENTATION, orientation);
-        return ImmutableList.of(new StructureTemplate.StructureBlockInfo(pos, state, JIGSAW_NBT));
-    }
-
-    @Override
-    public BoundingBox getGenerationBounds(StructureManager templates, BlockPos pos, Rotation rotation) {
-        return new BoundingBox(
-                pos.getX() - MAX_RADIUS, pos.getY() - MAX_RADIUS, pos.getZ() - MAX_RADIUS,
-                pos.getX() + MAX_RADIUS, pos.getY() + MAX_RADIUS, pos.getZ() + MAX_RADIUS
-        );
-    }
-
-    @Override
-    public Vec3i getSize(StructureManager templates, Rotation rotation) {
-        return Vec3i.ZERO;
-    }
-
-    @Override
-    public BoundingBox getBoundingBox(StructureManager templates, BlockPos pos, Rotation rotation) {
-        // hack: return an empty bounding box when running jigsaw assembly so that we can intersect with other branches
-        return new BoundingBox(pos);
-    }
-
-    @Override
-    public boolean place(StructureManager templates, WorldGenLevel world, StructureFeatureManager structures, ChunkGenerator generator, BlockPos origin, BlockPos p_230378_6_, Rotation rotation, BoundingBox chunkBounds, Random random, boolean p_230378_10_) {
-        WorldgenRandom rand = new WorldgenRandom(new LegacyRandomSource(world.getSeed()));
-        rand.setDecorationSeed(world.getSeed(), origin.getX(), origin.getZ());
-
-        final int branchLength = rand.nextInt(10) + 15;
-        // TODO make configurable
-        int branchX1 = origin.getX();
-        int branchZ1 = origin.getZ();
-        final double minAngle = Math.toRadians(this.minAngle);
-        final double maxAngle = Math.toRadians(this.maxAngle);
-        final double angle = minAngle + rand.nextFloat() * (maxAngle - minAngle);
-        int branchX2 = (int) ((branchLength * Math.sin(angle)) + branchX1);
-        int branchZ2 = (int) ((branchLength * Math.cos(angle)) + branchZ1);
-        int branchY2 = rand.nextInt(4) + 4;
-
-        BlockState wood = TropicraftBlocks.MAHOGANY_LOG.get().defaultBlockState();
-        final BlockState leaf = TropicraftBlocks.MAHOGANY_LEAVES.get().defaultBlockState();
-        final int leafCircleSizeConstant = 3;
-        final int y2 = origin.getY() + branchY2;
-
-        placeBlockLine(world, new BlockPos(branchX1, origin.getY(), branchZ1), new BlockPos(branchX2, y2, branchZ2), wood, chunkBounds);
-        placeBlockLine(world, new BlockPos(branchX1 + 1, origin.getY(), branchZ1), new BlockPos(branchX2 + 1, y2, branchZ2), wood, chunkBounds);
-        placeBlockLine(world, new BlockPos(branchX1 - 1, origin.getY(), branchZ1), new BlockPos(branchX2 - 1, y2, branchZ2), wood, chunkBounds);
-        placeBlockLine(world, new BlockPos(branchX1, origin.getY(), branchZ1 + 1), new BlockPos(branchX2, y2, branchZ2 + 1), wood, chunkBounds);
-        placeBlockLine(world, new BlockPos(branchX1, origin.getY(), branchZ1 - 1), new BlockPos(branchX2, y2, branchZ2 - 1), wood, chunkBounds);
-        placeBlockLine(world, new BlockPos(branchX1, origin.getY() - 1, branchZ1), new BlockPos(branchX2, y2 - 1, branchZ2), wood, chunkBounds);
-        placeBlockLine(world, new BlockPos(branchX1, origin.getY() + 1, branchZ1), new BlockPos(branchX2, y2 + 1, branchZ2), wood, chunkBounds);
-        genLeafCircle(world, branchX2, y2 - 1, branchZ2, leafCircleSizeConstant + 5, leafCircleSizeConstant + 3, leaf, chunkBounds);
-        genLeafCircle(world, branchX2, y2, branchZ2, leafCircleSizeConstant + 6, 0, leaf, chunkBounds);
-        genLeafCircle(world, branchX2, y2 + 1, branchZ2, leafCircleSizeConstant + 10, 0, leaf, chunkBounds);
-        genLeafCircle(world, branchX2, y2 + 2, branchZ2, leafCircleSizeConstant + 9, 0, leaf, chunkBounds);
-
-        return true;
     }
 
     public void genLeafCircle(final WorldGenLevel world, final int x, final int y, final int z, int outerRadius, int innerRadius, BlockState state, BoundingBox chunkBounds) {
@@ -224,7 +160,63 @@ public final class HomeTreeBranchPiece extends StructurePoolElement implements P
     }
 
     @Override
+    public Vec3i getSize(StructureTemplateManager pStructureTemplateManager, Rotation pRotation) {
+        return Vec3i.ZERO;
+    }
+
+    @Override
+    public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(StructureTemplateManager p_227351_, BlockPos p_227352_, Rotation p_227353_, RandomSource p_227354_) {
+        FrontAndTop orientation = FrontAndTop.fromFrontAndTop(Direction.DOWN, Direction.SOUTH);
+        BlockState state = Blocks.JIGSAW.defaultBlockState().setValue(JigsawBlock.ORIENTATION, orientation);
+        return ImmutableList.of(new StructureTemplate.StructureBlockInfo(p_227352_, state, JIGSAW_NBT));
+    }
+
+    @Override
+    public BoundingBox getBoundingBox(StructureTemplateManager pStructureTemplateManager, BlockPos p_227349_, Rotation pRotation) {
+        return new BoundingBox(p_227349_);
+    }
+
+    @Override
+    public boolean place(StructureTemplateManager pStructureTemplateManager, WorldGenLevel pLevel, StructureManager pStructureManager, ChunkGenerator pGenerator, BlockPos p_227340_, BlockPos p_227341_, Rotation pRotation, BoundingBox pBox, RandomSource pRandom, boolean p_227345_) {
+        final int branchLength = pRandom.nextInt(10) + 15;
+        // TODO make configurable
+        int branchX1 = p_227340_.getX();
+        int branchZ1 = p_227340_.getZ();
+        final double minAngle = Math.toRadians(this.minAngle);
+        final double maxAngle = Math.toRadians(this.maxAngle);
+        final double angle = minAngle + pRandom.nextFloat() * (maxAngle - minAngle);
+        int branchX2 = (int) ((branchLength * Math.sin(angle)) + branchX1);
+        int branchZ2 = (int) ((branchLength * Math.cos(angle)) + branchZ1);
+        int branchY2 = pRandom.nextInt(4) + 4;
+
+        BlockState wood = TropicraftBlocks.MAHOGANY_LOG.get().defaultBlockState();
+        final BlockState leaf = TropicraftBlocks.MAHOGANY_LEAVES.get().defaultBlockState();
+        final int leafCircleSizeConstant = 3;
+        final int y2 = p_227340_.getY() + branchY2;
+
+        placeBlockLine(pLevel, new BlockPos(branchX1, p_227340_.getY(), branchZ1), new BlockPos(branchX2, y2, branchZ2), wood, pBox);
+        placeBlockLine(pLevel, new BlockPos(branchX1 + 1, p_227340_.getY(), branchZ1), new BlockPos(branchX2 + 1, y2, branchZ2), wood, pBox);
+        placeBlockLine(pLevel, new BlockPos(branchX1 - 1, p_227340_.getY(), branchZ1), new BlockPos(branchX2 - 1, y2, branchZ2), wood, pBox);
+        placeBlockLine(pLevel, new BlockPos(branchX1, p_227340_.getY(), branchZ1 + 1), new BlockPos(branchX2, y2, branchZ2 + 1), wood, pBox);
+        placeBlockLine(pLevel, new BlockPos(branchX1, p_227340_.getY(), branchZ1 - 1), new BlockPos(branchX2, y2, branchZ2 - 1), wood, pBox);
+        placeBlockLine(pLevel, new BlockPos(branchX1, p_227340_.getY() - 1, branchZ1), new BlockPos(branchX2, y2 - 1, branchZ2), wood, pBox);
+        placeBlockLine(pLevel, new BlockPos(branchX1, p_227340_.getY() + 1, branchZ1), new BlockPos(branchX2, y2 + 1, branchZ2), wood, pBox);
+        genLeafCircle(pLevel, branchX2, y2 - 1, branchZ2, leafCircleSizeConstant + 5, leafCircleSizeConstant + 3, leaf, pBox);
+        genLeafCircle(pLevel, branchX2, y2, branchZ2, leafCircleSizeConstant + 6, 0, leaf, pBox);
+        genLeafCircle(pLevel, branchX2, y2 + 1, branchZ2, leafCircleSizeConstant + 10, 0, leaf, pBox);
+        genLeafCircle(pLevel, branchX2, y2 + 2, branchZ2, leafCircleSizeConstant + 9, 0, leaf, pBox);
+
+        return true;
+    }
+
+    @Override
     public StructurePoolElementType<?> getType() {
         return TYPE;
+    }
+
+    @Override
+    public BoundingBox getGenerationBounds(StructureTemplateManager templates, BlockPos pos, Rotation rotation) {
+        //TODO
+        return this.getBoundingBox(templates, pos, rotation);
     }
 }

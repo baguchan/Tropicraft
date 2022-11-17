@@ -32,7 +32,7 @@ public class FireArmorItem extends TropicraftArmorItem {
             if (player.isOnFire()) player.clearFire();
 
             // Repair in the sun?
-            int factor = (int)(40D / (0.001D + world.getBrightness(player.blockPosition())));
+            int factor = (int) (40D / (0.001D + world.getLightLevelDependentMagicValue(player.blockPosition())));
             if (world.getGameTime() % (factor) == 0 && world.canSeeSkyFromBelowWater(new BlockPos(Mth.floor(player.getX()), Mth.floor(player.getY() + 1), Mth.floor(player.getZ())))) {
                 //repair!
                 stack.hurtAndBreak(-1, player, (e) -> {
@@ -72,7 +72,7 @@ public class FireArmorItem extends TropicraftArmorItem {
         }
 
         /** 0 for all, 1 for minimal, 2 for off */
-        ParticleStatus particles = Minecraft.getInstance().options.particles;
+        ParticleStatus particles = Minecraft.getInstance().options.particles().get();
         if (particles == ParticleStatus.MINIMAL) return;
 
         if (this == TropicraftItems.FIRE_BOOTS.get()) {

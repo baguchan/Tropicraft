@@ -1,6 +1,7 @@
 package net.tropicraft.core.common.dimension.biome;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.BiomeDefaultFeatures;
@@ -14,24 +15,26 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
-import net.minecraft.world.level.levelgen.placement.*;
-import net.minecraftforge.common.world.BiomeGenerationSettingsBuilder;
-import net.minecraftforge.event.world.BiomeLoadingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.world.level.levelgen.placement.BiomeFilter;
+import net.minecraft.world.level.levelgen.placement.InSquarePlacement;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import net.minecraft.world.level.levelgen.placement.RarityFilter;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import net.tropicraft.Constants;
 import net.tropicraft.core.common.block.TropicraftBlocks;
 import net.tropicraft.core.common.dimension.carver.TropicraftConfiguredCarvers;
-import net.tropicraft.core.common.dimension.feature.TropicraftFeatures;
 import net.tropicraft.core.common.dimension.feature.TropicraftMiscPlacements;
 import net.tropicraft.core.common.dimension.feature.TropicraftVegetationPlacements;
 import net.tropicraft.core.common.dimension.feature.tree.PalmTreeFeature;
@@ -44,6 +47,14 @@ import static net.minecraft.data.worldgen.placement.VegetationPlacements.TREE_TH
 @Mod.EventBusSubscriber(modid = Constants.MODID)
 public final class TropicraftBiomes {
     public static final DeferredRegister<Biome> REGISTER = DeferredRegister.create(Registry.BIOME_REGISTRY, Constants.MODID);
+
+    public static final MultiNoiseBiomeSource.Preset TROPICS_BIOMESOURCE = new MultiNoiseBiomeSource.Preset(new ResourceLocation(Constants.MODID, "tropics"), (p_187108_) -> {
+        ImmutableList.Builder<Pair<Climate.ParameterPoint, Holder<Biome>>> builder = ImmutableList.builder();
+        (new TropicraftBiomeBuilder()).addBiomes((p_204279_) -> {
+            builder.add(p_204279_.mapSecond(p_187108_::getOrCreateHolderOrThrow));
+        });
+        return new Climate.ParameterList<>(builder.build());
+    });
 
     public static final int TROPICS_WATER_COLOR = 0x4eecdf;
     public static final int TROPICS_WATER_FOG_COLOR = 0x041f33;
@@ -65,7 +76,7 @@ public final class TropicraftBiomes {
     public static final RegistryObject<Biome> MANGROVES = REGISTER.register("mangroves", () -> createMangroves(false));
     public static final RegistryObject<Biome> OVERGROWN_MANGROVES = REGISTER.register("overgrown_mangroves", () -> createMangroves(true));
 
-    @SubscribeEvent
+    /*@SubscribeEvent
     public static void onBiomeLoad(BiomeLoadingEvent event) {
         ResourceLocation name = event.getName();
         if (name != null && name.getNamespace().equals(Constants.MODID)) {
@@ -88,6 +99,10 @@ public final class TropicraftBiomes {
         } else if (category == Biome.BiomeCategory.JUNGLE) {
             generation.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, pineapple());
         }
+    }*/
+
+    public static void init() {
+
     }
 
     private static Holder<PlacedFeature> palmTree(final RegistryObject<PalmTreeFeature> palmTreeFeature) {
@@ -135,7 +150,6 @@ public final class TropicraftBiomes {
                 .precipitation(Biome.Precipitation.RAIN)
 //                .depth(0.1F).scale(0.1F)
                 .temperature(2.0F).downfall(1.5F)
-                .biomeCategory(Biome.BiomeCategory.PLAINS)
                 .generationSettings(generation.build())
                 .mobSpawnSettings(spawns.build())
                 .specialEffects(defaultAmbience(true).build())
@@ -161,7 +175,6 @@ public final class TropicraftBiomes {
                 .precipitation(Biome.Precipitation.RAIN)
 //                .depth(-0.1F).scale(0.1F)
                 .temperature(1.5F).downfall(1.25F)
-                .biomeCategory(Biome.BiomeCategory.BEACH)
                 .generationSettings(generation.build())
                 .mobSpawnSettings(spawns.build())
                 .specialEffects(defaultAmbience(false).build())
@@ -206,7 +219,6 @@ public final class TropicraftBiomes {
         return new Biome.BiomeBuilder()
                 .precipitation(Biome.Precipitation.RAIN)
                 .temperature(1.5F).downfall(2.0F)
-                .biomeCategory(Biome.BiomeCategory.JUNGLE)
                 .generationSettings(generation.build())
                 .mobSpawnSettings(spawns.build())
                 .specialEffects(defaultAmbience(true).build())
@@ -251,7 +263,6 @@ public final class TropicraftBiomes {
         return new Biome.BiomeBuilder()
                 .precipitation(Biome.Precipitation.RAIN)
                 .temperature(1.5F).downfall(2.0F)
-                .biomeCategory(Biome.BiomeCategory.JUNGLE)
                 .generationSettings(generation.build())
                 .mobSpawnSettings(spawns.build())
                 .specialEffects(defaultAmbience(true).build())
@@ -282,7 +293,6 @@ public final class TropicraftBiomes {
                 .precipitation(Biome.Precipitation.RAIN)
 //                .depth(-1.6F).scale(0.4F)
                 .temperature(1.5F).downfall(1.25F)
-                .biomeCategory(Biome.BiomeCategory.OCEAN)
                 .generationSettings(generation.build())
                 .mobSpawnSettings(spawns.build())
                 .specialEffects(defaultAmbience(false).build())
@@ -308,7 +318,6 @@ public final class TropicraftBiomes {
                 .precipitation(Biome.Precipitation.RAIN)
 //                .depth(-1.5F).scale(0.3F)
                 .temperature(1.5F).downfall(1.25F)
-                .biomeCategory(Biome.BiomeCategory.OCEAN)
                 .generationSettings(generation.build())
                 .mobSpawnSettings(spawns.build())
                 .specialEffects(defaultAmbience(false).build())
@@ -330,7 +339,6 @@ public final class TropicraftBiomes {
                 .precipitation(Biome.Precipitation.RAIN)
 //                .depth(-0.7F).scale(0.05F)
                 .temperature(1.5F).downfall(1.25F)
-                .biomeCategory(Biome.BiomeCategory.RIVER)
                 .generationSettings(generation.build())
                 .mobSpawnSettings(spawns.build())
                 .specialEffects(defaultAmbience(false).build())
@@ -381,7 +389,6 @@ public final class TropicraftBiomes {
                 .precipitation(Biome.Precipitation.RAIN)
 //                .depth(-0.25F).scale(-0.045F)
                 .temperature(2.0F).downfall(1.5F)
-                .biomeCategory(Biome.BiomeCategory.SWAMP)
                 .generationSettings(generation.build())
                 .mobSpawnSettings(spawns.build())
                 .specialEffects(ambience.build())

@@ -1,7 +1,7 @@
 package net.tropicraft.core.client.data;
 
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.HashCache;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
@@ -11,7 +11,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.data.LanguageProvider;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.tropicraft.Constants;
 import net.tropicraft.Tropicraft;
@@ -462,34 +462,34 @@ public class TropicraftLangProvider extends LanguageProvider {
         addBiome(TropicraftBiomes.OSA_RAINFOREST);
 
         // MISC
-        
+
         add(Tropicraft.TROPICRAFT_ITEM_GROUP, "Tropicraft");
-        add("attribute.name." + ForgeMod.SWIM_SPEED.get().getRegistryName().getPath(), "Swim Speed");
+        add("attribute.name." + ForgeRegistries.ATTRIBUTES.getKey(ForgeMod.SWIM_SPEED.get()).getPath(), "Swim Speed");
 
         // Koa
         add("entity.tropicraft.koa.female.hunter.name", "Koa Hunter");
         add("entity.tropicraft.koa.female.fisherman.name", "Koa Fisher");
         add("entity.tropicraft.koa.male.hunter.name", "Koa Hunter");
         add("entity.tropicraft.koa.male.fisherman.name", "Koa Fisher");
-        
+
         TropicraftLangKeys.generate(this);
     }
-    
-    private String getAutomaticName(Supplier<? extends IForgeRegistryEntry<?>> sup) {
-        return Util.toEnglishName(sup.get().getRegistryName().getPath());
+
+    private String getAutomaticName(ResourceLocation resourceLocation) {
+        return Util.toEnglishName(resourceLocation.getPath());
     }
-    
+
     private void addBlock(Supplier<? extends Block> block) {
-        addBlock(block, getAutomaticName(block));
+        addBlock(block, getAutomaticName(ForgeRegistries.BLOCKS.getKey(block.get())));
     }
-    
+
     private void addBlockWithTooltip(Supplier<? extends Block> block, String tooltip) {
         addBlock(block);
         addTooltip(block, tooltip);
     }
     
     private void addItem(Supplier<? extends Item> item) {
-        addItem(item, getAutomaticName(item));
+        addItem(item, getAutomaticName(ForgeRegistries.ITEMS.getKey(item.get())));
     }
     
     private void addItemWithTooltip(Supplier<? extends Item> block, String name, List<String> tooltip) {
@@ -513,7 +513,7 @@ public class TropicraftLangProvider extends LanguageProvider {
     }
     
     private void addEntityType(Supplier<? extends EntityType<?>> entity) {
-        addEntityType(entity, getAutomaticName(entity));
+        addEntityType(entity, getAutomaticName(ForgeRegistries.ENTITY_TYPES.getKey(entity.get())));
     }
     
     private void addBiome(RegistryObject<Biome> biome) {
@@ -573,7 +573,7 @@ public class TropicraftLangProvider extends LanguageProvider {
     }
 
     @Override
-    public void run(HashCache cache) throws IOException {
+    public void run(CachedOutput cache) throws IOException {
         super.run(cache);
         upsideDown.run(cache);
     }

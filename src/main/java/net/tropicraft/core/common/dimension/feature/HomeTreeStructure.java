@@ -7,66 +7,87 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
-import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
-import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.tropicraft.core.common.dimension.feature.jigsaw.piece.NoRotateSingleJigsawPiece;
 import net.tropicraft.core.common.dimension.feature.jigsaw.piece.PieceWithGenerationBounds;
 import net.tropicraft.core.common.dimension.feature.jigsaw.piece.TropicraftStructurePieceTypes;
+import net.tropicraft.core.common.dimension.feature.pools.TropicraftTemplatePools;
 
 import java.util.Optional;
-import java.util.function.Predicate;
 
-public class HomeTreeStructure extends StructureFeature<JigsawConfiguration> {
-    public HomeTreeStructure(Codec<JigsawConfiguration> codec, Predicate<PieceGeneratorSupplier.Context<JigsawConfiguration>> context) {
-        super(codec, (p_197102_) -> {
-            if (!context.test(p_197102_)) {
-                return Optional.empty();
-            } else {
-                BlockPos blockpos = new BlockPos(p_197102_.chunkPos().getMinBlockX(), 0, p_197102_.chunkPos().getMinBlockZ());
-                return JigsawPlacement.addPieces(p_197102_, Piece::new, blockpos, true, true);
-            }
-        });
+public class HomeTreeStructure extends Structure {
+    public static final Codec<HomeTreeStructure> CODEC = simpleCodec(HomeTreeStructure::new);
+
+    public HomeTreeStructure(Structure.StructureSettings p_227385_) {
+        super(p_227385_);
     }
 
-    private static boolean isValid(ChunkGenerator generator, BlockPos pos, int startY, final LevelHeightAccessor level) {
-        int y = generator.getBaseHeight(pos.getX(), pos.getZ(), Heightmap.Types.WORLD_SURFACE_WG, level);
+    private static void generatePieces(StructurePiecesBuilder p_227392_, BlockPos p_227531_, Rotation p_227532_, Structure.GenerationContext p_227393_) {
+        BlockPos blockpos = new BlockPos(p_227393_.chunkPos().getBlockX(9), 90, p_227393_.chunkPos().getBlockZ(9));
+        StructurePoolElement structurepoolelement = TropicraftTemplatePools.HOME_TREE_STARTS.get().getRandomTemplate(p_227393_.random());
+        p_227392_.addPiece(new Piece(p_227393_.structureTemplateManager(), structurepoolelement, blockpos, 0, p_227532_, structurepoolelement.getBoundingBox(p_227393_.structureTemplateManager(), blockpos, p_227532_)));
+    }
+
+    public Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext pContext) {
+        Rotation rotation = Rotation.getRandom(pContext.random());
+        BlockPos blockpos = this.getLowestYIn5by5BoxOffset7Blocks(pContext, rotation);
+
+        if (!checkLocation(pContext)) {
+            return Optional.empty();
+        }
+
+        return blockpos.getY() < 60 ? Optional.empty() : Optional.of(new Structure.GenerationStub(blockpos, (p_227538_) -> {
+            this.generatePieces(p_227538_, blockpos, rotation, pContext);
+        }));
+    }
+
+
+    private static boolean isValid(ChunkGenerator generator, BlockPos pos, int startY, final LevelHeightAccessor level, RandomState randomState) {
+        int y = generator.getBaseHeight(pos.getX(), pos.getZ(), Heightmap.Types.WORLD_SURFACE_WG, level, randomState);
         return y >= generator.getSeaLevel()
                 && Math.abs(y - startY) < 10
                 && y < 150
                 && y > generator.getSeaLevel() + 2;
     }
 
-    public static boolean checkLocation(PieceGeneratorSupplier.Context<JigsawConfiguration> context) {
-        final ChunkGenerator generator = context.chunkGenerator();
-        final BlockPos pos = context.chunkPos().getWorldPosition();
-        final LevelHeightAccessor level = context.heightAccessor();
-        int y = generator.getBaseHeight(pos.getX(), pos.getZ(), Heightmap.Types.WORLD_SURFACE_WG, level);
-        return isValid(generator, pos.offset(-4, 0, -4), y, level) &&
-                isValid(generator, pos.offset(-4, 0, 4), y, level) &&
-                isValid(generator, pos.offset(4, 0, 4), y, level) &&
-                isValid(generator, pos.offset(4, 0, -4), y, level);
+    public static boolean checkLocation(Structure.GenerationContext pContext) {
+        final ChunkGenerator generator = pContext.chunkGenerator();
+        final BlockPos pos = pContext.chunkPos().getWorldPosition();
+        final LevelHeightAccessor level = pContext.heightAccessor();
+        final RandomState randomState = pContext.randomState();
+        int y = generator.getBaseHeight(pos.getX(), pos.getZ(), Heightmap.Types.WORLD_SURFACE_WG, level, randomState);
+        return isValid(generator, pos.offset(-4, 0, -4), y, level, randomState) &&
+                isValid(generator, pos.offset(-4, 0, 4), y, level, randomState) &&
+                isValid(generator, pos.offset(4, 0, 4), y, level, randomState) &&
+                isValid(generator, pos.offset(4, 0, -4), y, level, randomState);
+    }
+
+    @Override
+    public StructureType<?> type() {
+        return TropicraftStructureType.HOME_TREE.get();
     }
 
     public static class Piece extends PoolElementStructurePiece {
-        public Piece(StructureManager templates, StructurePoolElement piece, BlockPos pos, int groundLevelDelta, Rotation rotation, BoundingBox bounds) {
+        public Piece(StructureTemplateManager templates, StructurePoolElement piece, BlockPos pos, int groundLevelDelta, Rotation rotation, BoundingBox bounds) {
             super(templates, piece, pos, groundLevelDelta, rotation, bounds);
             this.boundingBox = this.fixGenerationBoundingBox(templates);
         }
 
         public Piece(StructurePieceSerializationContext pContext, CompoundTag data) {
             super(pContext, data);
-            this.boundingBox = this.fixGenerationBoundingBox(pContext.structureManager());
+            this.boundingBox = this.fixGenerationBoundingBox(pContext.structureTemplateManager());
         }
 
-        private BoundingBox fixGenerationBoundingBox(StructureManager templates) {
+        private BoundingBox fixGenerationBoundingBox(StructureTemplateManager templates) {
             if (this.element instanceof PieceWithGenerationBounds piece) {
                 return piece.getGenerationBounds(templates, this.position, Rotation.NONE);
             } else {

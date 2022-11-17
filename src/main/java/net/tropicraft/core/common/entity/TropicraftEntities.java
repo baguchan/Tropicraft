@@ -2,7 +2,13 @@ package net.tropicraft.core.common.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.entity.*;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.LevelAccessor;
@@ -19,22 +25,53 @@ import net.minecraftforge.registries.RegistryObject;
 import net.tropicraft.Constants;
 import net.tropicraft.core.common.TropicraftTags;
 import net.tropicraft.core.common.dimension.TropicraftDimension;
-import net.tropicraft.core.common.entity.egg.*;
+import net.tropicraft.core.common.entity.egg.EggEntity;
+import net.tropicraft.core.common.entity.egg.SeaTurtleEggEntity;
+import net.tropicraft.core.common.entity.egg.SeaUrchinEggEntity;
+import net.tropicraft.core.common.entity.egg.StarfishEggEntity;
+import net.tropicraft.core.common.entity.egg.TropiSpiderEggEntity;
 import net.tropicraft.core.common.entity.hostile.AshenEntity;
 import net.tropicraft.core.common.entity.hostile.TropiSkellyEntity;
 import net.tropicraft.core.common.entity.hostile.TropiSpiderEntity;
-import net.tropicraft.core.common.entity.neutral.*;
-import net.tropicraft.core.common.entity.passive.*;
+import net.tropicraft.core.common.entity.neutral.EIHEntity;
+import net.tropicraft.core.common.entity.neutral.IguanaEntity;
+import net.tropicraft.core.common.entity.neutral.JaguarEntity;
+import net.tropicraft.core.common.entity.neutral.TreeFrogEntity;
+import net.tropicraft.core.common.entity.neutral.VMonkeyEntity;
+import net.tropicraft.core.common.entity.passive.CowktailEntity;
+import net.tropicraft.core.common.entity.passive.EntityKoaBase;
+import net.tropicraft.core.common.entity.passive.EntityKoaHunter;
+import net.tropicraft.core.common.entity.passive.FailgullEntity;
+import net.tropicraft.core.common.entity.passive.FiddlerCrabEntity;
+import net.tropicraft.core.common.entity.passive.FishingBobberEntity;
+import net.tropicraft.core.common.entity.passive.HummingbirdEntity;
+import net.tropicraft.core.common.entity.passive.TapirEntity;
+import net.tropicraft.core.common.entity.passive.TropiCreeperEntity;
+import net.tropicraft.core.common.entity.passive.WhiteLippedPeccaryEntity;
 import net.tropicraft.core.common.entity.passive.basilisk.BasiliskLizardEntity;
 import net.tropicraft.core.common.entity.passive.monkey.SpiderMonkeyEntity;
-import net.tropicraft.core.common.entity.placeable.*;
+import net.tropicraft.core.common.entity.placeable.AshenMaskEntity;
+import net.tropicraft.core.common.entity.placeable.BeachFloatEntity;
+import net.tropicraft.core.common.entity.placeable.ChairEntity;
+import net.tropicraft.core.common.entity.placeable.UmbrellaEntity;
+import net.tropicraft.core.common.entity.placeable.WallItemEntity;
 import net.tropicraft.core.common.entity.projectile.ExplodingCoconutEntity;
 import net.tropicraft.core.common.entity.projectile.LavaBallEntity;
 import net.tropicraft.core.common.entity.projectile.PoisonBlotEntity;
 import net.tropicraft.core.common.entity.projectile.SpearEntity;
-import net.tropicraft.core.common.entity.underdasea.*;
+import net.tropicraft.core.common.entity.underdasea.CuberaEntity;
+import net.tropicraft.core.common.entity.underdasea.EagleRayEntity;
+import net.tropicraft.core.common.entity.underdasea.ManOWarEntity;
+import net.tropicraft.core.common.entity.underdasea.MarlinEntity;
+import net.tropicraft.core.common.entity.underdasea.PiranhaEntity;
+import net.tropicraft.core.common.entity.underdasea.SardineEntity;
+import net.tropicraft.core.common.entity.underdasea.SeaUrchinEntity;
+import net.tropicraft.core.common.entity.underdasea.SeahorseEntity;
+import net.tropicraft.core.common.entity.underdasea.SharkEntity;
+import net.tropicraft.core.common.entity.underdasea.StarfishEntity;
+import net.tropicraft.core.common.entity.underdasea.TropicraftDolphinEntity;
+import net.tropicraft.core.common.entity.underdasea.TropicraftTropicalFishEntity;
 
-import java.util.Random;
 import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid = Constants.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -43,7 +80,7 @@ public class TropicraftEntities {
     private static final float EGG_WIDTH = 0.4F;
     private static final float EGG_HEIGHT = 0.5F;
 
-    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, Constants.MODID);
+    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, Constants.MODID);
 
     public static final RegistryObject<EntityType<EntityKoaHunter>> KOA_HUNTER = register("koa", TropicraftEntities::koaHunter);
     public static final RegistryObject<EntityType<TropiCreeperEntity>> TROPI_CREEPER = register("tropicreeper", TropicraftEntities::tropicreeper);
@@ -520,7 +557,7 @@ public class TropicraftEntities {
         // TODO tropibee, or from nests?
     }
 
-    public static boolean canAnimalSpawn(EntityType<? extends Mob> animal, LevelAccessor worldIn, MobSpawnType reason, BlockPos pos, Random random) {
+    public static boolean canAnimalSpawn(EntityType<? extends Mob> animal, LevelAccessor worldIn, MobSpawnType reason, BlockPos pos, RandomSource random) {
         BlockState groundState = worldIn.getBlockState(pos.below());
         return groundState.getBlock() == Blocks.GRASS_BLOCK
                 || groundState.getMaterial() == Material.SAND
@@ -539,12 +576,12 @@ public class TropicraftEntities {
         SpawnPlacements.register(type, SpawnPlacements.Type.NO_RESTRICTIONS, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, predicate);
     }
 
-    public static <T extends Mob> boolean canSpawnOceanWaterMob(EntityType<T> waterMob, LevelAccessor world, MobSpawnType reason, BlockPos pos, Random rand) {
+    public static <T extends Mob> boolean canSpawnOceanWaterMob(EntityType<T> waterMob, LevelAccessor world, MobSpawnType reason, BlockPos pos, RandomSource rand) {
         int seaLevel = TropicraftDimension.getSeaLevel(world);
         return pos.getY() > 90 && pos.getY() < seaLevel && world.getFluidState(pos).is(FluidTags.WATER);
     }
 
-    public static <T extends Mob> boolean canSpawnSurfaceOceanWaterMob(EntityType<T> waterMob, LevelAccessor world, MobSpawnType reason, BlockPos pos, Random rand) {
+    public static <T extends Mob> boolean canSpawnSurfaceOceanWaterMob(EntityType<T> waterMob, LevelAccessor world, MobSpawnType reason, BlockPos pos, RandomSource rand) {
         int seaLevel = TropicraftDimension.getSeaLevel(world);
         return pos.getY() > seaLevel - 3 && pos.getY() < seaLevel && world.getFluidState(pos).is(FluidTags.WATER);
     }

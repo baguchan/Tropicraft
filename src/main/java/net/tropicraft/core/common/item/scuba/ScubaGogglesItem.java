@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.FogType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.EntityViewRenderEvent.FogDensity;
+import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
@@ -53,22 +53,23 @@ public class ScubaGogglesItem extends ScubaArmorItem {
         );
     }
 
-    @SubscribeEvent
-    @OnlyIn(Dist.CLIENT)
-    public static void renderWaterFog(FogDensity event) {
-        Camera info = event.getCamera();
-        //FluidState fluid = info.getFluidInCamera();
-        FogType fogType = info.getFluidInCamera();
-        if (/*fluid.is(FluidTags.WATER) &&*/fogType == FogType.WATER && info.getEntity() instanceof LocalPlayer player) {
-            if (player.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof ScubaGogglesItem) {
-                float f = 192.0F;
-                f *= Math.max(0.25F, player.getWaterVision());
+	@SubscribeEvent
+	@OnlyIn(Dist.CLIENT)
+	public static void renderWaterFog(ViewportEvent.RenderFog event) {
+		Camera info = event.getCamera();
+		//FluidState fluid = info.getFluidInCamera();
+		FogType fogType = info.getFluidInCamera();
+		if (/*fluid.is(FluidTags.WATER) &&*/fogType == FogType.WATER && info.getEntity() instanceof LocalPlayer player) {
+			if (player.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof ScubaGogglesItem) {
+				float f = 192.0F;
+				f *= Math.max(0.25F, player.getWaterVision());
 
-                f *= 1.25;
+				f *= 1.25;
 
-                event.setDensity(f);
-                event.setCanceled(true);
-            }
+				//TODO BETTER Fog System
+				event.setFarPlaneDistance(f);
+				event.setCanceled(true);
+			}
         }
     }
 

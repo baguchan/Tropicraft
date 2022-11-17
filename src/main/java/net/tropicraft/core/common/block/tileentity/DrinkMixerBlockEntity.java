@@ -159,7 +159,7 @@ public class DrinkMixerBlockEntity extends BlockEntity implements IMachineBlock 
                 continue;
             }
 
-            final ItemStack container = ingredients.get(i).getItem().getContainerItem(ingredients.get(i));
+            final ItemStack container = ingredients.get(i).getItem().getCraftingRemainingItem(ingredients.get(i));
 
             if (!container.isEmpty()) {
                 dropItem(container, at);

@@ -2,9 +2,11 @@ package net.tropicraft.core.common.dimension.feature;
 
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.DiskConfiguration;
+import net.minecraft.world.level.levelgen.feature.stateproviders.RuleBasedBlockStateProvider;
 import net.minecraftforge.registries.RegistryObject;
 import net.tropicraft.core.common.block.TropicraftBlocks;
 
@@ -14,10 +16,10 @@ public final class TropicraftMiscFeatures {
     public static final TropicraftFeatures.Register REGISTER = TropicraftFeatures.Register.create();
 
     public static final RegistryObject<ConfiguredFeature<?, ?>> MUD_DISK = REGISTER.feature("mud_disk", Feature.DISK, () -> new DiskConfiguration(
-            TropicraftBlocks.MUD.get().defaultBlockState(),
+            RuleBasedBlockStateProvider.simple(TropicraftBlocks.MUD.get()),
+            BlockPredicate.matchesBlocks(List.of(Blocks.DIRT, Blocks.GRASS_BLOCK)),
             UniformInt.of(2, 4),
-            2,
-            List.of(Blocks.DIRT.defaultBlockState(), Blocks.GRASS_BLOCK.defaultBlockState())
+            2
     ));
 
     public static final RegistryObject<ConfiguredFeature<?, ?>> EIH = REGISTER.feature("eih", TropicraftFeatures.EIH);

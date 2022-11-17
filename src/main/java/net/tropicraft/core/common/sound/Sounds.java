@@ -1,13 +1,13 @@
 package net.tropicraft.core.common.sound;
 
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.level.block.Block;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 import net.tropicraft.Constants;
 
 import java.lang.annotation.ElementType;
@@ -108,13 +108,15 @@ public class Sounds {
     @Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD)
     public static class RegistryEvents {
         @SubscribeEvent(priority = EventPriority.HIGHEST)
-        public static void onBlocksRegistry(final RegistryEvent.Register<Block> event) {
-            for (Field f : Sounds.class.getDeclaredFields()) {
-                if (f.isAnnotationPresent(SoundName.class)) {
-                    try {
-                        f.set(null, register(f.getAnnotation(SoundName.class).value()));
-                    } catch (IllegalArgumentException | IllegalAccessException e) {
-                        e.printStackTrace();
+        public static void onBlocksRegistry(final RegisterEvent event) {
+            if (event.getRegistryKey() == Registry.SOUND_EVENT_REGISTRY) {
+                for (Field f : Sounds.class.getDeclaredFields()) {
+                    if (f.isAnnotationPresent(SoundName.class)) {
+                        try {
+                            f.set(null, register(f.getAnnotation(SoundName.class).value()));
+                        } catch (IllegalArgumentException | IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -124,7 +126,7 @@ public class Sounds {
     private static SoundEvent register(String soundPath) {
         ResourceLocation resLoc = new ResourceLocation(Constants.MODID, soundPath);
         SoundEvent soundEvent = new SoundEvent(resLoc);
-        ForgeRegistries.SOUND_EVENTS.register(soundEvent.setRegistryName(resLoc));
+        ForgeRegistries.SOUND_EVENTS.register(resLoc, soundEvent);
         if (registeredSounds.contains(soundPath)) {
             System.out.println("TCWARNING: duplicate sound registration for " + soundPath);
         }

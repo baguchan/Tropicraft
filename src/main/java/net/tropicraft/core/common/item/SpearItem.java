@@ -31,7 +31,6 @@ public class SpearItem extends TridentItem {
 		this.tier = tier;
 
 		this.defaultModifiers = ImmutableMultimap.<Attribute, AttributeModifier>builder()
-				.putAll(super.getAttributeModifiers(EquipmentSlot.MAINHAND, new ItemStack(this)))
 				.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Tool modifier", attackDamage, AttributeModifier.Operation.ADDITION))
 				.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Tool modifier", attackSpeed, AttributeModifier.Operation.ADDITION))
 				.build();
@@ -72,8 +71,9 @@ public class SpearItem extends TridentItem {
 		return slot == EquipmentSlot.MAINHAND ? this.defaultModifiers : super.getAttributeModifiers(slot, stack);
 	}
 
+
 	@Override
-	public int getItemEnchantability(ItemStack stack) {
+	public int getEnchantmentValue(ItemStack stack) {
 		return this.tier.getEnchantmentValue();
 	}
 

@@ -1,6 +1,7 @@
 package net.tropicraft.core.common.item;
 
-import net.minecraft.network.chat.TranslatableComponent;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -29,7 +30,7 @@ public class ExplodingCoconutItem extends Item {
         ItemStack itemstack = player.getItemInHand(hand);
         if (!canPlayerThrow && !ltOverride) {
             if (!world.isClientSide) {
-                player.displayClientMessage(new TranslatableComponent("tropicraft.coconutBombWarning"), false);
+				player.displayClientMessage(Component.translatable("tropicraft.coconutBombWarning"), false);
             }
             return new InteractionResultHolder<>(InteractionResult.PASS, itemstack);
         }

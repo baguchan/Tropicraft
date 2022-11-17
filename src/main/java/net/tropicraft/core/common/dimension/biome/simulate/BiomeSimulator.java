@@ -1,28 +1,7 @@
 package net.tropicraft.core.common.dimension.biome.simulate;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.util.Pair;
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
-import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.Bootstrap;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Climate;
-import net.tropicraft.core.common.dimension.biome.TropicraftBiomeBuilder;
-import net.tropicraft.core.common.dimension.biome.TropicraftBiomes;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
 public class BiomeSimulator {
-    private static final Map<ResourceKey<Biome>, Integer> COLORS = new HashMap<>();
+    /*private static final Map<ResourceKey<Biome>, Integer> COLORS = new HashMap<>();
     static {
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
@@ -93,5 +72,5 @@ public class BiomeSimulator {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 }

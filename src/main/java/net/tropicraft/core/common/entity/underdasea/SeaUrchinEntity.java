@@ -1,7 +1,7 @@
 package net.tropicraft.core.common.entity.underdasea;
 
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddMobPacket;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -113,7 +113,7 @@ public class SeaUrchinEntity extends EchinodermEntity {
 
     @Override
     public Packet<?> getAddEntityPacket() {
-        return new ClientboundAddMobPacket(this);
+		return new ClientboundAddEntityPacket(this);
     }
 
     @Override

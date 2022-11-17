@@ -22,7 +22,7 @@ public class AshenRenderer extends MobRenderer<AshenEntity, AshenModel> {
         super(context, new AshenModel(context.bakeLayer(TropicraftRenderLayers.ASHEN_LAYER)), 0.5f);
 
         addLayer(new AshenMaskLayer(this, new AshenModel(context.bakeLayer(TropicraftRenderLayers.ASHEN_LAYER))));
-        AshenHeldItemLayer<AshenEntity, AshenModel> layer = new AshenHeldItemLayer<>(this);
+        AshenHeldItemLayer<AshenEntity, AshenModel> layer = new AshenHeldItemLayer<>(this, context.getItemInHandRenderer());
         layer.setAshenModel(model);
         addLayer(layer);
         shadowStrength = 0.5f;

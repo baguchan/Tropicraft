@@ -22,7 +22,6 @@ import net.tropicraft.core.common.network.message.MessageSifterStart;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Random;
 
 public class SifterBlockEntity extends BlockEntity {
 
@@ -35,8 +34,6 @@ public class SifterBlockEntity extends BlockEntity {
     /** Current progress in sifting; -1 if not sifting */
     private int currentSiftTime;
 
-    private Random rand;
-
     public double yaw;
     public double yaw2 = 0.0D;
 
@@ -45,7 +42,6 @@ public class SifterBlockEntity extends BlockEntity {
 
     public SifterBlockEntity(final BlockPos pos, final BlockState state) {
         super(TropicraftBlockEntityTypes.SIFTER.get(), pos, state);
-        rand = new Random();
         currentSiftTime = SIFT_TIME;
     }
 
@@ -84,20 +80,20 @@ public class SifterBlockEntity extends BlockEntity {
 
     // TODO replace with loot table
     private void dumpBeachResults(final BlockPos pos) {
-        int dumpCount = rand.nextInt(3) + 1;
+        int dumpCount = level.random.nextInt(3) + 1;
         ItemStack stack;
 
         while (dumpCount > 0) {
             dumpCount--;
 
-            if (rand.nextInt(10) == 0) {
+            if (level.random.nextInt(10) == 0) {
                 stack = getRareItem();
-            } else if (rand.nextInt(10) < 3) {
+            } else if (level.random.nextInt(10) < 3) {
                 String name;
-                if (rand.nextBoolean()) {
-                    name = Constants.LT17_NAMES[rand.nextInt(Constants.LT17_NAMES.length)];
+                if (level.random.nextBoolean()) {
+                    name = Constants.LT17_NAMES[level.random.nextInt(Constants.LT17_NAMES.length)];
                 } else {
-                    name = Constants.LT18_NAMES[rand.nextInt(Constants.LT18_NAMES.length)];
+                    name = Constants.LT18_NAMES[level.random.nextInt(Constants.LT18_NAMES.length)];
                 }
                 final CompoundTag nameTag = new CompoundTag();
                 nameTag.putString("Name", name);
@@ -125,15 +121,15 @@ public class SifterBlockEntity extends BlockEntity {
 
         HolderSet.Named<Item> tag = Registry.ITEM.getOrCreateTag(TropicraftTags.Items.SHELLS);
 
-        final int shellIndex = rand.nextInt(tag.size() + 1) - 1;
+        final int shellIndex = level.random.nextInt(tag.size() + 1) - 1;
         if (shellIndex < 0) {
             return getRareItem();
         }
-        return new ItemStack(tag.getRandomElement(rand).get().value());
+        return new ItemStack(tag.getRandomElement(level.random).get().value());
     }
 
     private ItemStack getRareItem() {
-        final int dmg = rand.nextInt(12);
+        final int dmg = level.random.nextInt(12);
 
         switch (dmg) {
             case 1:

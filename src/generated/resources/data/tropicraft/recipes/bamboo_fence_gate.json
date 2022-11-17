@@ -1,17 +1,17 @@
 {
   "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "forge:rods/wooden"
+    },
+    "W": {
+      "item": "tropicraft:bamboo_bundle"
+    }
+  },
   "pattern": [
     "#W#",
     "#W#"
   ],
-  "key": {
-    "W": {
-      "item": "tropicraft:bamboo_bundle"
-    },
-    "#": {
-      "tag": "forge:rods/wooden"
-    }
-  },
   "result": {
     "item": "tropicraft:bamboo_fence_gate"
   }

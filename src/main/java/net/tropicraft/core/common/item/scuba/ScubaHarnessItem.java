@@ -3,7 +3,6 @@ package net.tropicraft.core.common.item.scuba;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -34,9 +33,8 @@ public class ScubaHarnessItem extends ScubaArmorItem {
         super.appendHoverText(stack, worldIn, tooltip, flagIn);
         int airRemaining = getRemainingAir(stack);
         tooltip.add(TropicraftLangKeys.SCUBA_AIR_TIME
-                .format(new TextComponent(ScubaHUD.formatTime(airRemaining))
-                        .withStyle(ScubaHUD.getAirTimeColor(airRemaining, worldIn)))
-                .withStyle(ChatFormatting.GRAY));
+				.format(Component.literal(ScubaHUD.formatTime(airRemaining))
+						.withStyle(ScubaHUD.getAirTimeColor(airRemaining, worldIn)).withStyle(ChatFormatting.GRAY)));
     }
 
     @Override

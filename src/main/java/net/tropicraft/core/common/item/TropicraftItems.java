@@ -2,18 +2,19 @@ package net.tropicraft.core.common.item;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import net.minecraft.core.Registry;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerPotBlock;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 import net.tropicraft.Constants;
 import net.tropicraft.Tropicraft;
@@ -24,7 +25,11 @@ import net.tropicraft.core.common.entity.TropicraftEntities;
 import net.tropicraft.core.common.entity.placeable.BeachFloatEntity;
 import net.tropicraft.core.common.entity.placeable.ChairEntity;
 import net.tropicraft.core.common.entity.placeable.UmbrellaEntity;
-import net.tropicraft.core.common.item.scuba.*;
+import net.tropicraft.core.common.item.scuba.PonyBottleItem;
+import net.tropicraft.core.common.item.scuba.ScubaFlippersItem;
+import net.tropicraft.core.common.item.scuba.ScubaGogglesItem;
+import net.tropicraft.core.common.item.scuba.ScubaHarnessItem;
+import net.tropicraft.core.common.item.scuba.ScubaType;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -209,22 +214,24 @@ public class TropicraftItems {
     private static <T extends Item> RegistryObject<T> register(final String name, final Supplier<T> sup) {
         return ITEMS.register(name, sup);
     }
-    
-    @SubscribeEvent
-    public static void onItemRegister(RegistryEvent.Register<Item> event) {
-        ForgeRegistries.BLOCKS.getValues().stream()
-            .filter(b -> b instanceof FlowerPotBlock)
-            .map(b -> (FlowerPotBlock) b)
-            .forEach(b -> {
-                if (b.getEmptyPot().getRegistryName().equals(TropicraftBlocks.BAMBOO_FLOWER_POT.getId()) && b.getEmptyPot() != b) {
-                    addPlant(TropicraftBlocks.BAMBOO_FLOWER_POT.get(), b);
-                } else if (b.getContent().getRegistryName().getNamespace().equals(Constants.MODID)) {
-                    addPlant((FlowerPotBlock) Blocks.FLOWER_POT, b);
-                }
-            });
-    }
+
+	@SubscribeEvent
+	public static void onItemRegister(RegisterEvent event) {
+		if (event.getRegistryKey() == Registry.ITEM_REGISTRY) {
+			ForgeRegistries.BLOCKS.getValues().stream()
+					.filter(b -> b instanceof FlowerPotBlock)
+					.map(b -> (FlowerPotBlock) b)
+					.forEach(b -> {
+						if (ForgeRegistries.BLOCKS.getKey(b.getEmptyPot()).equals(TropicraftBlocks.BAMBOO_FLOWER_POT.getId()) && b.getEmptyPot() != b) {
+							addPlant(TropicraftBlocks.BAMBOO_FLOWER_POT.get(), b);
+						} else if (ForgeRegistries.BLOCKS.getKey(b.getContent()).getNamespace().equals(Constants.MODID)) {
+							addPlant((FlowerPotBlock) Blocks.FLOWER_POT, b);
+						}
+					});
+		}
+	}
     
     private static void addPlant(FlowerPotBlock empty, FlowerPotBlock full) {
-        empty.addPlant(full.getContent().getRegistryName(), full.delegate);
+		empty.addPlant(ForgeRegistries.BLOCKS.getKey(full.getContent()), () -> full);
     }
 }

@@ -12,30 +12,30 @@ import java.util.function.Supplier;
 
 public enum TropicraftFlower implements Supplier<Block> {
 
-    ACAI_VINE(MobEffects.REGENERATION.delegate, 0, 7, 16),
-    ANEMONE(MobEffects.REGENERATION.delegate, 0, 9),
-    BROMELIAD(MobEffects.REGENERATION.delegate, 0, 9),
-    CANNA(MobEffects.REGENERATION.delegate, 0),
-    COMMELINA_DIFFUSA(MobEffects.REGENERATION.delegate, 0),
-    CROCOSMIA(MobEffects.REGENERATION.delegate, 0),
-    CROTON(MobEffects.REGENERATION.delegate, 0, 13),
-    DRACAENA(MobEffects.REGENERATION.delegate, 0, 13),
-    TROPICAL_FERN(MobEffects.REGENERATION.delegate, 0, 13),
-    FOLIAGE(MobEffects.REGENERATION.delegate, 0, 13),
-    MAGIC_MUSHROOM(MobEffects.REGENERATION.delegate, 0, 11),
-    ORANGE_ANTHURIUM(MobEffects.REGENERATION.delegate, 0, 11),
-    ORCHID(MobEffects.REGENERATION.delegate, 0),
-    PATHOS(MobEffects.REGENERATION.delegate, 0, 15, 12),
-    RED_ANTHURIUM(MobEffects.REGENERATION.delegate, 0, 11);
+	ACAI_VINE(() -> MobEffects.REGENERATION, 0, 7, 16),
+	ANEMONE(() -> MobEffects.REGENERATION, 0, 9),
+	BROMELIAD(() -> MobEffects.REGENERATION, 0, 9),
+	CANNA(() -> MobEffects.REGENERATION, 0),
+	COMMELINA_DIFFUSA(() -> MobEffects.REGENERATION, 0),
+	CROCOSMIA(() -> MobEffects.REGENERATION, 0),
+	CROTON(() -> MobEffects.REGENERATION, 0, 13),
+	DRACAENA(() -> MobEffects.REGENERATION, 0, 13),
+	TROPICAL_FERN(() -> MobEffects.REGENERATION, 0, 13),
+	FOLIAGE(() -> MobEffects.REGENERATION, 0, 13),
+	MAGIC_MUSHROOM(() -> MobEffects.REGENERATION, 0, 11),
+	ORANGE_ANTHURIUM(() -> MobEffects.REGENERATION, 0, 11),
+	ORCHID(() -> MobEffects.REGENERATION, 0),
+	PATHOS(() -> MobEffects.REGENERATION, 0, 15, 12),
+	RED_ANTHURIUM(() -> MobEffects.REGENERATION, 0, 11);
 
-    private final String name;
-    private final Supplier<MobEffect> effect;
-    private final int effectDuration;
-    private final VoxelShape shape;
+	private final String name;
+	private final Supplier<MobEffect> effect;
+	private final int effectDuration;
+	private final VoxelShape shape;
 
-    private TropicraftFlower(Supplier<MobEffect> effect, int effectDuration) {
-        this(effect, effectDuration, 7);
-    }
+	private TropicraftFlower(Supplier<MobEffect> effect, int effectDuration) {
+		this(effect, effectDuration, 7);
+	}
 
     private TropicraftFlower(Supplier<MobEffect> effect, int effectDuration, int w) {
         this(effect, effectDuration, w, 15);

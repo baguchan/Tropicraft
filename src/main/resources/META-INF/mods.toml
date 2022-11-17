@@ -1,6 +1,6 @@
-modLoader="javafml"
-loaderVersion="[40,)"
-issueTrackerURL="https://github.com/Tropicraft/Tropicraft/issues"
+modLoader = "javafml"
+loaderVersion = "[43,)"
+issueTrackerURL = "https://github.com/Tropicraft/Tropicraft/issues"
 license="Mozilla Public License Version 2.0"
 
 [[mods]]

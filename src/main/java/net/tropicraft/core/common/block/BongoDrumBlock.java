@@ -99,8 +99,8 @@ public class BongoDrumBlock extends Block {
 
     @SubscribeEvent
     public static void onBlockLeftClick(PlayerInteractEvent.LeftClickBlock event) {
-        final Level world = event.getWorld();
-        final BlockState state = world.getBlockState(event.getPos());
+        final Level world = event.getLevel();
+		final BlockState state = world.getBlockState(event.getPos());
         final Block block = state.getBlock();
         if (state.getBlock() instanceof BongoDrumBlock && event.getFace() == Direction.UP) {
             ((BongoDrumBlock)block).playBongoSound(world, event.getPos(), state);

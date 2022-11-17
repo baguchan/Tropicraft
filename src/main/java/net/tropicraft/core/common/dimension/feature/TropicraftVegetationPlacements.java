@@ -10,7 +10,16 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
-import net.minecraft.world.level.levelgen.placement.*;
+import net.minecraft.world.level.levelgen.placement.BiomeFilter;
+import net.minecraft.world.level.levelgen.placement.BlockPredicateFilter;
+import net.minecraft.world.level.levelgen.placement.CarvingMaskPlacement;
+import net.minecraft.world.level.levelgen.placement.CountPlacement;
+import net.minecraft.world.level.levelgen.placement.HeightmapPlacement;
+import net.minecraft.world.level.levelgen.placement.InSquarePlacement;
+import net.minecraft.world.level.levelgen.placement.NoiseBasedCountPlacement;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import net.minecraft.world.level.levelgen.placement.RarityFilter;
 import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
@@ -148,9 +157,9 @@ public final class TropicraftVegetationPlacements {
 
     private static List<PlacementModifier> seagrassPlacement(final Supplier<? extends Block> belowBlock) {
         final BlockPredicateFilter seagrassPredicate = BlockPredicateFilter.forPredicate(BlockPredicate.allOf(
-                BlockPredicate.matchesBlock(belowBlock.get(), new BlockPos(0, -1, 0)),
-                BlockPredicate.matchesBlock(Blocks.WATER, BlockPos.ZERO),
-                BlockPredicate.matchesBlock(Blocks.WATER, new BlockPos(0, 1, 0))));
+                BlockPredicate.matchesBlocks(new BlockPos(0, -1, 0), belowBlock.get()),
+                BlockPredicate.matchesBlocks(BlockPos.ZERO, Blocks.WATER),
+                BlockPredicate.matchesBlocks(new BlockPos(0, 1, 0), Blocks.WATER)));
 
         return List.of(CarvingMaskPlacement.forStep(GenerationStep.Carving.LIQUID),
                 RarityFilter.onAverageOnceEvery(10),

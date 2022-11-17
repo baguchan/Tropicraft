@@ -5,16 +5,40 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FlowerBlock;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.RedstoneWallTorchBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.TallFlowerBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.client.IItemRenderProperties;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -27,7 +51,11 @@ import net.tropicraft.core.common.block.huge_plant.HugePlantBlock;
 import net.tropicraft.core.common.block.jigarbov.JigarbovTorchType;
 import net.tropicraft.core.common.block.tileentity.TropicraftBlockEntityTypes;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -40,10 +68,10 @@ public class TropicraftBlocks {
     public static final DeferredRegister<Item> BLOCKITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Constants.MODID);
 
     public static final RegistryObject<PortalWaterBlock> TELEPORT_WATER = registerNoItem(
-            "teleport_water", () -> new PortalWaterBlock(Block.Properties.of(Material.WATER).noDrops()));
+            "teleport_water", () -> new PortalWaterBlock(Block.Properties.of(Material.WATER).noLootTable()));
 
     public static final RegistryObject<LiquidBlock> PORTAL_WATER = registerNoItem(
-            "portal_water", () -> new LiquidBlock(() -> Fluids.WATER, Block.Properties.of(Material.WATER).noDrops()));
+            "portal_water", () -> new LiquidBlock(() -> Fluids.WATER, Block.Properties.of(Material.WATER).noLootTable()));
 
     public static final RegistryObject<Block> CHUNK = register(
             "chunk", Builder.block(Block.Properties.of(Material.STONE, MaterialColor.COLOR_BLACK).strength(6.0F, 30F)));
@@ -246,7 +274,7 @@ public class TropicraftBlocks {
             "air_compressor", () -> new AirCompressorBlock(Block.Properties.of(Material.STONE).strength(2, 30).noOcclusion()),
             () -> TropicraftItemRenderers.airCompressor());
     public static final RegistryObject<VolcanoBlock> VOLCANO = registerNoItem(
-            "volcano", () -> new VolcanoBlock(Block.Properties.copy(Blocks.BEDROCK).noDrops()));
+            "volcano", () -> new VolcanoBlock(Block.Properties.copy(Blocks.BEDROCK).noLootTable()));
     
     public static final RegistryObject<TikiTorchBlock> TIKI_TORCH = register(
             "tiki_torch", () -> new TikiTorchBlock(Block.Properties.copy(Blocks.TORCH).sound(SoundType.WOOD).lightLevel(state -> state.getValue(TikiTorchBlock.SECTION) == TorchSection.UPPER ? 15 : 0)));
@@ -259,7 +287,7 @@ public class TropicraftBlocks {
 
     public static final RegistryObject<BushBlock> GOLDEN_LEATHER_FERN = register(
             "small_golden_leather_fern",
-            () -> new GrowableSinglePlantBlock(Block.Properties.copy(Blocks.FERN), () -> TropicraftBlocks.TALL_GOLDEN_LEATHER_FERN)
+            () -> new GrowableSinglePlantBlock(Block.Properties.copy(Blocks.FERN).offsetType(BlockBehaviour.OffsetType.XZ), () -> TropicraftBlocks.TALL_GOLDEN_LEATHER_FERN)
     );
 
     public static final RegistryObject<DoublePlantBlock> TALL_GOLDEN_LEATHER_FERN = registerNoItem(
@@ -291,11 +319,11 @@ public class TropicraftBlocks {
     
     public static final List<RegistryObject<FlowerPotBlock>> BAMBOO_POTTED_VANILLA_PLANTS = ImmutableList.copyOf(
             Stream.of(Blocks.OAK_SAPLING, Blocks.SPRUCE_SAPLING, Blocks.BIRCH_SAPLING, Blocks.JUNGLE_SAPLING,
-                Blocks.ACACIA_SAPLING, Blocks.DARK_OAK_SAPLING, Blocks.FERN, Blocks.DANDELION, Blocks.POPPY,
-                Blocks.BLUE_ORCHID, Blocks.ALLIUM, Blocks.AZURE_BLUET, Blocks.RED_TULIP, Blocks.ORANGE_TULIP,
-                Blocks.WHITE_TULIP, Blocks.PINK_TULIP, Blocks.OXEYE_DAISY, Blocks.CORNFLOWER, Blocks.LILY_OF_THE_VALLEY,
-                Blocks.WITHER_ROSE, Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM, Blocks.DEAD_BUSH, Blocks.CACTUS)
-            .map(b -> registerNoItem("bamboo_potted_" + b.getRegistryName().getPath(), Builder.tropicraftPot(() -> b)))
+                            Blocks.ACACIA_SAPLING, Blocks.DARK_OAK_SAPLING, Blocks.FERN, Blocks.DANDELION, Blocks.POPPY,
+                            Blocks.BLUE_ORCHID, Blocks.ALLIUM, Blocks.AZURE_BLUET, Blocks.RED_TULIP, Blocks.ORANGE_TULIP,
+                            Blocks.WHITE_TULIP, Blocks.PINK_TULIP, Blocks.OXEYE_DAISY, Blocks.CORNFLOWER, Blocks.LILY_OF_THE_VALLEY,
+                            Blocks.WITHER_ROSE, Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM, Blocks.DEAD_BUSH, Blocks.CACTUS)
+                    .map(b -> registerNoItem("bamboo_potted_" + ForgeRegistries.BLOCKS.getKey(b).getPath(), Builder.tropicraftPot(() -> b)))
             .collect(Collectors.toList()));
     
     public static final List<RegistryObject<FlowerPotBlock>> ALL_POTTED_PLANTS = ImmutableList.<RegistryObject<FlowerPotBlock>>builder()
@@ -323,8 +351,8 @@ public class TropicraftBlocks {
     private static <T extends Block> RegistryObject<T> registerWithFood(String name, Supplier<? extends T> sup, FoodProperties food) {
         return register(name, sup, TropicraftBlocks::itemDefault);
     }
-    
-    private static <T extends Block> RegistryObject<T> register(String name, Supplier<? extends T> sup, Supplier<IItemRenderProperties> renderProperties) {
+
+    private static <T extends Block> RegistryObject<T> register(String name, Supplier<? extends T> sup, Supplier<IClientItemExtensions> renderProperties) {
         return register(name, sup, block -> item(block, renderProperties));
     }
     
@@ -350,10 +378,10 @@ public class TropicraftBlocks {
         return () -> new BlockItem(block.get(), new Item.Properties().tab(Tropicraft.TROPICRAFT_ITEM_GROUP).food(food));
     }
 
-    private static Supplier<BlockItem> item(final RegistryObject<? extends Block> block, final Supplier<IItemRenderProperties> renderProperties) {
+    private static Supplier<BlockItem> item(final RegistryObject<? extends Block> block, final Supplier<IClientItemExtensions> renderProperties) {
         return () -> new BlockItem(block.get(), new Item.Properties().tab(Tropicraft.TROPICRAFT_ITEM_GROUP)) {
             @Override
-            public void initializeClient(Consumer<IItemRenderProperties> consumer) {
+            public void initializeClient(Consumer<IClientItemExtensions> consumer) {
                 consumer.accept(renderProperties.get());
             }
         };

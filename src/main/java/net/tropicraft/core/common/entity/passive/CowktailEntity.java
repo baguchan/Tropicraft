@@ -8,6 +8,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -41,7 +42,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class CowktailEntity extends Cow implements IForgeShearable {
 	private static final EntityDataAccessor<String> COWKTAIL_TYPE = SynchedEntityData.defineId(CowktailEntity.class, EntityDataSerializers.STRING);
@@ -52,7 +52,7 @@ public class CowktailEntity extends Cow implements IForgeShearable {
 
 	@Override
 	public float getWalkTargetValue(BlockPos pos, LevelReader worldIn) {
-		return worldIn.getBlockState(pos.below()).getBlock() == Blocks.MYCELIUM ? 10.0F : worldIn.getBrightness(pos) - 0.5F;
+		return worldIn.getBlockState(pos.below()).getBlock() == Blocks.MYCELIUM ? 10.0F : worldIn.getLightLevelDependentMagicValue(pos) - 0.5F;
 	}
 
 	@Override
@@ -182,7 +182,7 @@ public class CowktailEntity extends Cow implements IForgeShearable {
 			this.renderState = renderStateIn;
 		}
 
-		public static CowktailEntity.Type getRandomType(final Random rand) {
+		public static CowktailEntity.Type getRandomType(final RandomSource rand) {
 			return values()[rand.nextInt(values().length)];
 		}
 

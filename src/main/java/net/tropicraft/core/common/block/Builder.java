@@ -3,7 +3,18 @@ package net.tropicraft.core.common.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.grower.AbstractTreeGrower;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,7 +55,7 @@ public class Builder {
     }
     
     public static Supplier<TropicsFlowerBlock> flower(TropicraftFlower type) {
-        return block(p -> new TropicsFlowerBlock(type.getEffect(), type.getEffectDuration(), type.getShape(), p), lazyProp(Blocks.POPPY.delegate));
+        return block(p -> new TropicsFlowerBlock(type.getEffect(), type.getEffectDuration(), type.getShape(), p), lazyProp(() -> Blocks.POPPY));
     }
 
     public static Supplier<BlockTropicraftSand> sand(final MaterialColor color) {
@@ -111,11 +122,11 @@ public class Builder {
     }
 
     public static Supplier<LeavesBlock> leaves(boolean decay) {
-        return block(decay ? LeavesBlock::new : TropicraftLeavesBlock::new, lazyProp(Blocks.OAK_LEAVES.delegate));
+        return block(decay ? LeavesBlock::new : TropicraftLeavesBlock::new, lazyProp(() -> Blocks.OAK_LEAVES));
     }
 
     public static Supplier<LeavesBlock> mangroveLeaves(Supplier<RegistryObject<PropaguleBlock>> propagule) {
-        return block(properties -> new MangroveLeavesBlock(properties.randomTicks(), () -> propagule.get().get()), lazyProp(Blocks.OAK_LEAVES.delegate));
+        return block(properties -> new MangroveLeavesBlock(properties.randomTicks(), () -> propagule.get().get()), lazyProp(() -> Blocks.OAK_LEAVES));
     }
 
     public static Supplier<Block> mangroveRoots() {
@@ -141,15 +152,15 @@ public class Builder {
                     return Arrays.stream(validPlantBlocks).map(Supplier::get).anyMatch(b -> b == block);
                 }
             }
-        }, lazyProp(Blocks.OAK_SAPLING.delegate));
+        }, lazyProp(() -> Blocks.OAK_SAPLING));
     }
 
     public static Supplier<SaplingBlock> waterloggableSapling(final AbstractTreeGrower tree) {
-        return block(p -> new WaterloggableSaplingBlock(tree, p), lazyProp(Blocks.OAK_SAPLING.delegate));
+        return block(p -> new WaterloggableSaplingBlock(tree, p), lazyProp(() -> Blocks.OAK_SAPLING));
     }
 
     public static Supplier<PropaguleBlock> propagule(final AbstractTreeGrower tree) {
-        return block(p -> new PropaguleBlock(tree, p), lazyProp(Blocks.OAK_SAPLING.delegate));
+        return block(p -> new PropaguleBlock(tree, p), lazyProp(() -> Blocks.OAK_SAPLING));
     }
 
     public static Supplier<FenceBlock> fence(final Supplier<? extends Block> source) {
@@ -173,7 +184,7 @@ public class Builder {
     }
 
     public static Supplier<FlowerPotBlock> tropicraftPot() {
-        return pot(null, Blocks.AIR.delegate, lazyProp(Material.DECORATION).then(p -> p.strength(0.2F, 5.0F).sound(SoundType.BAMBOO)));
+        return pot(null, () -> Blocks.AIR, lazyProp(Material.DECORATION).then(p -> p.strength(0.2F, 5.0F).sound(SoundType.BAMBOO)));
     }
 
     public static Supplier<FlowerPotBlock> tropicraftPot(final Supplier<? extends Block> block) {
@@ -181,7 +192,7 @@ public class Builder {
     }
 
     public static Supplier<FlowerPotBlock> vanillaPot(final Supplier<? extends Block> block) {
-        return pot(() -> (FlowerPotBlock) Blocks.FLOWER_POT.delegate.get(), block, lazyProp(Blocks.FLOWER_POT.delegate));
+        return pot(() -> (FlowerPotBlock) Blocks.FLOWER_POT, block, lazyProp(() -> Blocks.FLOWER_POT));
     }
 
     private static Block.Properties prop(final Material material) {

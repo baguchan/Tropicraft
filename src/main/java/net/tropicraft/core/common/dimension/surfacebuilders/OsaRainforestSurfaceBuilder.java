@@ -8,7 +8,7 @@ public class OsaRainforestSurfaceBuilder {// extends SurfaceBuilder<SurfaceBuild
 //    }
 //
 //    @Override
-//    public void apply(Random random, ChunkAccess chunk, Biome biome, int x, int z, int startHeight, double noise, BlockState defaultBlock, BlockState defaultFluid, int seaLevel, int pMinSurfaceLevel, long seed, SurfaceBuilderBaseConfiguration config) {
+//    public void apply(RandomSource random, ChunkAccess chunk, Biome biome, int x, int z, int startHeight, double noise, BlockState defaultBlock, BlockState defaultFluid, int seaLevel, int pMinSurfaceLevel, long seed, SurfaceBuilderBaseConfiguration config) {
 //        boolean muddy = noise + (random.nextDouble() * 0.2) > 4.5;
 //
 //        SurfaceBuilder.DEFAULT.apply(random, chunk, biome, x, z, startHeight, noise, defaultBlock, defaultFluid, seaLevel, pMinSurfaceLevel, seed, muddy ? MUD : config);

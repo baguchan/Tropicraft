@@ -15,6 +15,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,7 @@ public class StructureSupportsProcessor extends CheatyStructureProcessor {
     @Override
     public StructureBlockInfo process(LevelReader world, BlockPos seedPos, BlockPos pos2, StructureBlockInfo originalInfo, StructureBlockInfo blockInfo, StructurePlaceSettings placement, StructureTemplate template) {
         BlockPos pos = blockInfo.pos;
-        if (originalInfo.pos.getY() <= 1 && statesToExtend.contains(blockInfo.state.getBlock().getRegistryName())) {
+        if (originalInfo.pos.getY() <= 1 && statesToExtend.contains(ForgeRegistries.BLOCKS.getKey(blockInfo.state.getBlock()))) {
             if (!canReplaceLand && !canPassThrough(world, pos)) {
                 // Delete blocks that would generate inside land
                 return null;

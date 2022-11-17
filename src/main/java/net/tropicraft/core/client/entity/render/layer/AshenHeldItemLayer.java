@@ -5,6 +5,7 @@ import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -22,20 +23,20 @@ import net.tropicraft.core.common.entity.hostile.AshenEntity;
 @OnlyIn(Dist.CLIENT)
 public class AshenHeldItemLayer<T extends AshenEntity, M extends EntityModel<T> & ArmedModel> extends ItemInHandLayer<T, M> {
 
-    private AshenModel model;
+	private AshenModel model;
 
-    public AshenHeldItemLayer(RenderLayerParent<T, M> renderer) {
-        super(renderer);
-    }
+	public AshenHeldItemLayer(RenderLayerParent<T, M> renderer, ItemInHandRenderer p_234847_) {
+		super(renderer, p_234847_);
+	}
 
-    public void setAshenModel(final AshenModel model) {
-        this.model = model;
-    }
+	public void setAshenModel(final AshenModel model) {
+		this.model = model;
+	}
 
-    @Override
-    protected ResourceLocation getTextureLocation(AshenEntity entityIn) {
-        return TropicraftRenderUtils.getTextureEntity("ashen/ashen");
-    }
+	@Override
+	protected ResourceLocation getTextureLocation(AshenEntity entityIn) {
+		return TropicraftRenderUtils.getTextureEntity("ashen/ashen");
+	}
 
     @Override
     public void render(PoseStack stack, MultiBufferSource buffer, int packedLightIn, T ashen, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {

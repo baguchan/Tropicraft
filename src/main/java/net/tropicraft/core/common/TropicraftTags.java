@@ -4,22 +4,37 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.tropicraft.Constants;
 
 public class TropicraftTags {
+	public static class Biomes extends TropicraftTags {
+		public static final TagKey<Biome> HAS_HOME_TREE = modTag("has_structure/home_tree");
+		public static final TagKey<Biome> HAS_KOA_VILLAGE = modTag("has_structure/koa_village");
 
-    public static class Blocks extends TropicraftTags {
+		static TagKey<Biome> tag(String modid, String name) {
+			return TagKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(modid, name));
+		}
 
-        public static final TagKey<Block> SAND = modTag("sand");
-        public static final TagKey<Block> MUD = modTag("mud");
+		static TagKey<Biome> modTag(String name) {
+			return tag(Constants.MODID, name);
+		}
+	}
 
-        public static final TagKey<Block> SAPLINGS = modTag("saplings");
-        public static final TagKey<Block> LEAVES = modTag("leaves");
+	public static class Blocks extends TropicraftTags {
 
-        public static final TagKey<Block> SMALL_FLOWERS = modTag("small_flowers");
-        public static final TagKey<Block> TROPICS_FLOWERS = modTag("tropics_flowers");
-        public static final TagKey<Block> RAINFOREST_FLOWERS = modTag("rainforest_flowers");
+		public static final TagKey<Block> TROPICS_CARVER_REPLACEABLES = modTag("tropics_carver_replaceables");
+
+		public static final TagKey<Block> SAND = modTag("sand");
+		public static final TagKey<Block> MUD = modTag("mud");
+
+		public static final TagKey<Block> SAPLINGS = modTag("saplings");
+		public static final TagKey<Block> LEAVES = modTag("leaves");
+
+		public static final TagKey<Block> SMALL_FLOWERS = modTag("small_flowers");
+		public static final TagKey<Block> TROPICS_FLOWERS = modTag("tropics_flowers");
+		public static final TagKey<Block> RAINFOREST_FLOWERS = modTag("rainforest_flowers");
         public static final TagKey<Block> OVERWORLD_FLOWERS = modTag("overworld_flowers");
 
         public static final TagKey<Block> LOGS = modTag("logs");

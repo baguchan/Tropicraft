@@ -2,6 +2,7 @@ package net.tropicraft.core.common.dimension.feature.tree;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.LevelWriter;
 import net.minecraft.world.level.WorldGenLevel;
@@ -9,8 +10,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-
-import java.util.Random;
 
 import static net.tropicraft.core.common.dimension.feature.TropicraftFeatureUtil.goesBeyondWorldSize;
 import static net.tropicraft.core.common.dimension.feature.TropicraftFeatureUtil.isBBAvailable;
@@ -33,7 +32,7 @@ public class CurvedPalmTreeFeature extends PalmTreeFeature {
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
         WorldGenLevel world = context.level();
-        Random random = context.random();
+        RandomSource random = context.random();
         BlockPos pos = context.origin();
 
         pos = pos.immutable();
@@ -66,7 +65,7 @@ public class CurvedPalmTreeFeature extends PalmTreeFeature {
         for (int xx = 0; xx < 4; xx++) {
             for (int yy = 0; yy < height; yy++) {
                 final BlockPos posWithDir = getPosWithDir(xx, yy + y, 0);
-                if (!isAir(world, posWithDir)) {
+                if (!world.isEmptyBlock(posWithDir)) {
                     return false;
                 }
             }
@@ -76,7 +75,7 @@ public class CurvedPalmTreeFeature extends PalmTreeFeature {
         for (int xx = 0; xx < 9; xx++) {
             for (int zz = 0; zz < 9; zz++) {
                 for (int yy = height - 3; yy < height + 4; yy++) {
-                    if (!isAir(world, getPosWithDir(xx + TOP_OFFSET, yy + y, zz))) {
+                    if (!world.isEmptyBlock(getPosWithDir(xx + TOP_OFFSET, yy + y, zz))) {
                         return false;
                     }
                 }
@@ -133,12 +132,12 @@ public class CurvedPalmTreeFeature extends PalmTreeFeature {
         return true;
     }
 
-    private int findWater(final LevelSimulatedRW world, final Random rand, int x, int z) {
+    private int findWater(final LevelSimulatedRW world, final RandomSource rand, int x, int z) {
         int iPos = 0;
         int iNeg = 0;
         int kPos = 0;
         int kNeg = 0;
-        while (iPos < WATER_SEARCH_DIST &&  !isWater(world, new BlockPos(x + iPos, 127, z))) {
+        while (iPos < WATER_SEARCH_DIST && !isWater(world, new BlockPos(x + iPos, 127, z))) {
             iPos++;
         }
 
@@ -205,7 +204,7 @@ public class CurvedPalmTreeFeature extends PalmTreeFeature {
         return world.isStateAtPosition(pos, state -> state.is(Blocks.WATER));
     }
 
-    private int pickDirection(final LevelSimulatedRW world, final Random rand, int x, int z) {
+    private int pickDirection(final LevelSimulatedRW world, final RandomSource rand, int x, int z) {
         int direction = findWater(world, rand, x, z);
         if (direction != -1) {
             return direction;

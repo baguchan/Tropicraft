@@ -4,17 +4,50 @@ import net.minecraft.core.Direction;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.RedstoneTorchBlock;
+import net.minecraft.world.level.block.RedstoneWallTorchBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.TallFlowerBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.client.model.generators.*;
+import net.minecraftforge.client.model.generators.BlockModelBuilder;
+import net.minecraftforge.client.model.generators.BlockModelProvider;
+import net.minecraftforge.client.model.generators.BlockStateProvider;
+import net.minecraftforge.client.model.generators.ConfiguredModel;
+import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.client.model.generators.ModelProvider;
+import net.minecraftforge.client.model.generators.MultiPartBlockStateBuilder;
+import net.minecraftforge.client.model.generators.VariantBlockStateBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.tropicraft.Constants;
-import net.tropicraft.core.common.block.*;
+import net.tropicraft.core.common.block.BlockTropicraftSand;
+import net.tropicraft.core.common.block.BoardwalkBlock;
+import net.tropicraft.core.common.block.BongoDrumBlock;
+import net.tropicraft.core.common.block.CoffeeBushBlock;
+import net.tropicraft.core.common.block.MangroveRootsBlock;
+import net.tropicraft.core.common.block.PropaguleBlock;
+import net.tropicraft.core.common.block.ReedsBlock;
+import net.tropicraft.core.common.block.TikiTorchBlock;
 import net.tropicraft.core.common.block.TikiTorchBlock.TorchSection;
+import net.tropicraft.core.common.block.TropicraftBlocks;
+import net.tropicraft.core.common.block.TropicsFlowerBlock;
 import net.tropicraft.core.common.block.huge_plant.HugePlantBlock;
 import net.tropicraft.core.common.block.jigarbov.JigarbovTorchType;
 import org.apache.commons.lang3.ArrayUtils;
@@ -260,7 +293,7 @@ public class TropicraftBlockstateProvider extends BlockStateProvider {
             flowerPot(block, TropicraftBlocks.BAMBOO_FLOWER_POT, modBlockLoc("bamboo_side"));
         }
         for (RegistryObject<FlowerPotBlock> block : TropicraftBlocks.VANILLA_POTTED_TROPICS_PLANTS) {
-            flowerPot(block, Blocks.FLOWER_POT.delegate);
+            flowerPot(block, () -> Blocks.FLOWER_POT);
         }
         for (RegistryObject<FlowerPotBlock> block : TropicraftBlocks.BAMBOO_POTTED_VANILLA_PLANTS) {
             flowerPot(block, TropicraftBlocks.BAMBOO_FLOWER_POT, modBlockLoc("bamboo_side"));
@@ -291,16 +324,16 @@ public class TropicraftBlockstateProvider extends BlockStateProvider {
     }
 
     private String name(Supplier<? extends Block> block) {
-        return block.get().getRegistryName().getPath();
+        return ForgeRegistries.BLOCKS.getKey(block.get()).getPath();
     }
 
     private ResourceLocation blockTexture(Supplier<? extends Block> block) {
-        ResourceLocation base = block.get().getRegistryName();
+        ResourceLocation base = ForgeRegistries.BLOCKS.getKey(block.get());
         return new ResourceLocation(base.getNamespace(), ModelProvider.BLOCK_FOLDER + "/" + base.getPath());
     }
 
     private ResourceLocation itemTexture(Supplier<? extends ItemLike> item) {
-        ResourceLocation base = item.get().asItem().getRegistryName();
+        ResourceLocation base = ForgeRegistries.ITEMS.getKey(item.get().asItem());
         return new ResourceLocation(base.getNamespace(), ModelProvider.ITEM_FOLDER + "/" + base.getPath());
     }
 
@@ -383,7 +416,7 @@ public class TropicraftBlockstateProvider extends BlockStateProvider {
     }
 
     private void slabBlock(Supplier<? extends SlabBlock> block, Supplier<? extends Block> doubleslab, String side, String end) {
-        slabBlock(block.get(), doubleslab.get().getRegistryName(), modBlockLoc(side), modBlockLoc(end), modBlockLoc(end));
+        slabBlock(block.get(), ForgeRegistries.BLOCKS.getKey(doubleslab.get()), modBlockLoc(side), modBlockLoc(end), modBlockLoc(end));
     }
 
     private void plant(Supplier<? extends BushBlock> block) {
@@ -558,17 +591,17 @@ public class TropicraftBlockstateProvider extends BlockStateProvider {
 
     private void flowerPot(Supplier<? extends FlowerPotBlock> full, Supplier<? extends Block> empty, ResourceLocation particle) {
         Block flower = full.get().getContent();
-        boolean isVanilla = flower.getRegistryName().getNamespace().equals("minecraft");
-        String parent = flower == Blocks.AIR ? "flower_pot" : !isVanilla ? "flower_pot_cross" : ModelProvider.BLOCK_FOLDER + "/potted_" + name(flower.delegate);
+        boolean isVanilla = ForgeRegistries.BLOCKS.getKey(flower).getNamespace().equals("minecraft");
+        String parent = flower == Blocks.AIR ? "flower_pot" : !isVanilla ? "flower_pot_cross" : ModelProvider.BLOCK_FOLDER + "/potted_" + name(() -> flower);
         BlockModelBuilder model = models().withExistingParent(name(full), parent)
                 .texture("flowerpot", blockTexture(empty))
                 .texture("dirt", mcLoc("block/dirt"))
                 .texture("particle", modBlockLoc("bamboo_side"));
         if (!isVanilla) {
             if (flower instanceof TropicsFlowerBlock) {
-                model.texture("plant", modLoc(ModelProvider.BLOCK_FOLDER + "/flower/" + name(flower.delegate)));
+                model.texture("plant", modLoc(ModelProvider.BLOCK_FOLDER + "/flower/" + name(() -> flower)));
             } else if (flower instanceof TallFlowerBlock) {
-                model.texture("plant", modLoc(ModelProvider.BLOCK_FOLDER + "/"+ name(flower.delegate) + "_top"));
+                model.texture("plant", modLoc(ModelProvider.BLOCK_FOLDER + "/" + name(() -> flower) + "_top"));
             } else {
                 model.texture("plant", blockTexture(flower));
             }

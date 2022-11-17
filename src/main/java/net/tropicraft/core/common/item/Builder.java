@@ -5,7 +5,16 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.HoeItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemNameBlockItem;
+import net.minecraft.world.item.PickaxeItem;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.ShovelItem;
+import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.item.Tier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.registries.RegistryObject;
@@ -92,8 +101,10 @@ public class Builder {
     }
     
     public static Supplier<TropicalMusicDiscItem> musicDisc(RecordMusic type) {
-        return item(p -> new TropicalMusicDiscItem(type, p) {}, () -> getDefaultProperties().rarity(Rarity.RARE));
-    }
+		//TODO Apply the music length for Minecraft Allay
+		return item(p -> new TropicalMusicDiscItem(type, p, 100) {
+		}, () -> getDefaultProperties().rarity(Rarity.RARE));
+	}
 
     public static <T extends Entity> Supplier<Item> spawnEgg(final RegistryObject<EntityType<T>> type) {
         return item(p -> new TropicraftSpawnEgg<>(type, p), Builder::getDefaultProperties);

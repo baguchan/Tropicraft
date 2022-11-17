@@ -5,7 +5,10 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.levelgen.*;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.DensityFunctions;
+import net.minecraft.world.level.levelgen.NoiseRouter;
+import net.minecraft.world.level.levelgen.Noises;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 public final class TropicraftNoiseGen {
@@ -32,7 +35,7 @@ public final class TropicraftNoiseGen {
     private static final ResourceKey<DensityFunction> SPAGHETTI_2D_THICKNESS_MODULATOR = createKey("overworld/caves/spaghetti_2d_thickness_modulator");
     private static final ResourceKey<DensityFunction> SPAGHETTI_2D = createKey("overworld/caves/spaghetti_2d");
 
-    public static NoiseRouterWithOnlyNoises tropics(NoiseSettings settings) {
+    public static NoiseRouter tropics() {
         DensityFunction aquiferBarrier = DensityFunctions.noise(getNoise(Noises.AQUIFER_BARRIER), 0.5D);
         DensityFunction aquiferFluidLevelFloodedness = DensityFunctions.noise(getNoise(Noises.AQUIFER_FLUID_LEVEL_FLOODEDNESS), 0.67D);
         DensityFunction aquiferFluidLevelSpread = DensityFunctions.noise(getNoise(Noises.AQUIFER_FLUID_LEVEL_SPREAD), 0.7142857142857143D);
@@ -47,7 +50,7 @@ public final class TropicraftNoiseGen {
         DensityFunction slopedCheese = getFunction(SLOPED_CHEESE);
         DensityFunction densityfunction12 = DensityFunctions.min(slopedCheese, DensityFunctions.mul(DensityFunctions.constant(5.0D), getFunction(ENTRANCES)));
         DensityFunction densityfunction13 = DensityFunctions.rangeChoice(slopedCheese, -1000000.0D, 1.5625D, densityfunction12, underground(slopedCheese));
-        DensityFunction finalDensity = DensityFunctions.min(postProcess(settings, densityfunction13), getFunction(NOODLE));
+        DensityFunction finalDensity = DensityFunctions.min(postProcess(densityfunction13), getFunction(NOODLE));
         DensityFunction y = getFunction(Y);
         int j = -60;
         int k = 50;
@@ -56,7 +59,7 @@ public final class TropicraftNoiseGen {
         DensityFunction oreVeinB = yLimitedInterpolatable(y, DensityFunctions.noise(getNoise(Noises.ORE_VEIN_B), 4.0D, 4.0D), j, k, 0).abs();
         DensityFunction veinRidged = DensityFunctions.add(DensityFunctions.constant(-0.08F), DensityFunctions.max(oreVeinA, oreVeinB));
         DensityFunction veinGap = DensityFunctions.noise(getNoise(Noises.ORE_GAP));
-        return new NoiseRouterWithOnlyNoises(
+        return new NoiseRouter(
                 aquiferBarrier,
                 aquiferFluidLevelFloodedness,
                 aquiferFluidLevelSpread,
@@ -75,10 +78,9 @@ public final class TropicraftNoiseGen {
         );
     }
 
-    private static DensityFunction postProcess(NoiseSettings settings, DensityFunction function) {
-        DensityFunction slide = DensityFunctions.slide(settings, function);
-        DensityFunction blend = DensityFunctions.blendDensity(slide);
-        return DensityFunctions.mul(DensityFunctions.interpolated(blend), DensityFunctions.constant(0.64D)).squeeze();
+    private static DensityFunction postProcess(DensityFunction p_224493_) {
+        DensityFunction densityfunction = DensityFunctions.blendDensity(p_224493_);
+        return DensityFunctions.mul(DensityFunctions.interpolated(densityfunction), DensityFunctions.constant(0.64D)).squeeze();
     }
 
     private static Holder<NormalNoise.NoiseParameters> getNoise(ResourceKey<NormalNoise.NoiseParameters> p_209543_) {

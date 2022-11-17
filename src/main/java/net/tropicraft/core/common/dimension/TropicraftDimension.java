@@ -1,46 +1,38 @@
 package net.tropicraft.core.common.dimension;
 
-import com.google.common.collect.ImmutableSet;
+import com.mojang.serialization.DataResult;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.structure.StructureSet;
-import net.minecraft.world.level.levelgen.synth.NormalNoise;
-import net.minecraft.world.level.storage.LevelResource;
-import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 import net.tropicraft.Constants;
-import net.tropicraft.core.common.dimension.biome.TropicraftBiomeSource;
-import net.tropicraft.core.common.dimension.chunk.TropicraftChunkGenerator;
-import net.tropicraft.core.mixin.worldgen.LevelStemAccessor;
-import org.apache.commons.io.FileUtils;
+import net.tropicraft.core.common.TropicraftSurfaces;
+import net.tropicraft.core.common.dimension.biome.TropicraftBiomeBuilder;
+import net.tropicraft.core.common.dimension.noise.TropicraftNoiseGen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Set;
-import java.util.function.Supplier;
+import java.util.OptionalLong;
 
 @Mod.EventBusSubscriber(modid = Constants.MODID)
 public class TropicraftDimension {
@@ -53,64 +45,54 @@ public class TropicraftDimension {
     public static final ResourceKey<DimensionType> DIMENSION_TYPE = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, ID);
     public static final ResourceKey<NoiseGeneratorSettings> DIMENSION_SETTINGS = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, ID);
 
-    @SubscribeEvent
-    public static void onWorldLoad(WorldEvent.Load event) {
-        if (event.getWorld() instanceof ServerLevel) {
-            ServerLevel world = (ServerLevel) event.getWorld();
-            if (world.dimension() == Level.OVERWORLD) {
-                upgradeTropicraftDimension(world.getServer());
-            }
-        }
+    public static final DeferredRegister<NoiseGeneratorSettings> NOISE_GENERATORS = DeferredRegister.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, Constants.MODID);
+    public static final DeferredRegister<DimensionType> DIMENSION_TYPES = DeferredRegister.create(Registry.DIMENSION_TYPE_REGISTRY, Constants.MODID);
+
+    public static final RegistryObject<NoiseGeneratorSettings> TROPICS_NOISE_GEN = NOISE_GENERATORS.register("tropics", TropicraftDimension::tropics);
+    public static final RegistryObject<DimensionType> TROPICS_DIM_TYPE = DIMENSION_TYPES.register("tropics", TropicraftDimension::tropicsDimensionType);
+
+    static final NoiseSettings TROPI_NOISE_SETTINGS = create(-80, 384, 1, 2);
+
+    public static NoiseGeneratorSettings tropics() {
+        return new NoiseGeneratorSettings(TROPI_NOISE_SETTINGS, Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), TropicraftNoiseGen.tropics(), TropicraftSurfaces.tropics(), (new TropicraftBiomeBuilder()).spawnTarget(), 64, false, true, false, false);
     }
 
-    private static void upgradeTropicraftDimension(MinecraftServer server) {
-        // forge put dimensions in a different place to where vanilla does with its custom dimension support
-        // we need to move our old data to the correct place if it exists
-
-        LevelStorageSource.LevelStorageAccess save = server.storageSource;
-
-        File oldDimension = save.getLevelPath(new LevelResource("tropicraft/tropics")).toFile();
-        Path newDimension = save.getDimensionPath(WORLD);
-        if (oldDimension.exists() && !newDimension.toFile().exists()) {
-            try {
-                FileUtils.moveDirectory(oldDimension, newDimension.toFile());
-            } catch (IOException e) {
-                LOGGER.error("Failed to move old tropicraft dimension to new location!", e);
-            }
-        }
-    }
-
-    public static void addDefaultDimensionKey() {
-        Set<ResourceKey<LevelStem>> order = ImmutableSet.<ResourceKey<LevelStem>>builder()
-                .addAll(LevelStemAccessor.getBuiltinOrder())
-                .add(DIMENSION)
-                .build();
-        LevelStemAccessor.setBuiltinOrder(order);
-    }
-
-    public static LevelStem createDimension(
-            Registry<DimensionType> dimensionTypeRegistry,
-            Registry<StructureSet> structureSetRegistry,
-            Registry<Biome> biomeRegistry,
-            Registry<NoiseGeneratorSettings> dimensionSettingsRegistry,
-            Registry<NormalNoise.NoiseParameters> paramRegistry,
-            long seed
-    ) {
-        ChunkGenerator generator = TropicraftDimension.createGenerator(structureSetRegistry, paramRegistry, biomeRegistry, dimensionSettingsRegistry, seed);
-
-        return new LevelStem(dimensionTypeRegistry.getHolderOrThrow(TropicraftDimension.DIMENSION_TYPE), generator);
-    }
-
-    public static ChunkGenerator createGenerator(Registry<StructureSet> structureSetRegistry, Registry<NormalNoise.NoiseParameters> params, Registry<Biome> biomeRegistry, Registry<NoiseGeneratorSettings> dimensionSettingsRegistry, long seed) {
-        Supplier<NoiseGeneratorSettings> dimensionSettings = () -> {
-            // fallback to overworld so that we don't crash before our datapack is loaded (horrible workaround)
-            NoiseGeneratorSettings settings = dimensionSettingsRegistry.get(DIMENSION_SETTINGS);
-            return settings != null ? settings : dimensionSettingsRegistry.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
-        };
-        TropicraftBiomeSource biomeSource = new TropicraftBiomeSource(seed, biomeRegistry);
-        return new TropicraftChunkGenerator(structureSetRegistry, params, biomeSource, seed,
-                dimensionSettingsRegistry.getHolderOrThrow(dimensionSettingsRegistry.getResourceKey(dimensionSettings.get()).get())
+    private static DimensionType tropicsDimensionType() {
+        return new DimensionType(
+                OptionalLong.empty(),
+                true, //skylight
+                false, //ceiling
+                false, //ultrawarm
+                true, //natural
+                1.0D, //coordinate scale
+                true, //bed works
+                false, //respawn anchor works
+                -64,
+                384,
+                384, // Logical Height
+                BlockTags.INFINIBURN_OVERWORLD, //infiburn
+                new ResourceLocation("tropicraft:tropics"), // DimensionRenderInfo
+                0f, // Wish this could be set to -0.05 since it'll make the world truly blacked out if an area is not sky-lit (see: Dark Forests) Sadly this also messes up night vision so it gets 0
+                new DimensionType.MonsterSettings(false, true, UniformInt.of(0, 7), 7)
         );
+    }
+
+    private static DataResult<NoiseSettings> guardY(NoiseSettings p_158721_) {
+        if (p_158721_.minY() + p_158721_.height() > DimensionType.MAX_Y + 1) {
+            return DataResult.error("min_y + height cannot be higher than: " + (DimensionType.MAX_Y + 1));
+        } else if (p_158721_.height() % 16 != 0) {
+            return DataResult.error("height has to be a multiple of 16");
+        } else {
+            return p_158721_.minY() % 16 != 0 ? DataResult.error("min_y has to be a multiple of 16") : DataResult.success(p_158721_);
+        }
+    }
+
+    public static NoiseSettings create(int p_224526_, int p_224527_, int p_224528_, int p_224529_) {
+        NoiseSettings noisesettings = new NoiseSettings(p_224526_, p_224527_, p_224528_, p_224529_);
+        guardY(noisesettings).error().ifPresent((p_158719_) -> {
+            throw new IllegalStateException(p_158719_.message());
+        });
+        return noisesettings;
     }
 
     /**

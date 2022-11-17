@@ -3,6 +3,7 @@ package net.tropicraft.core.common.dimension.feature.tree;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelSimulatedRW;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SaplingBlock;
@@ -13,8 +14,6 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
 import net.tropicraft.core.common.block.CoconutBlock;
 import net.tropicraft.core.common.block.TropicraftBlocks;
 import org.apache.commons.lang3.ArrayUtils;
-
-import java.util.Random;
 
 public abstract class PalmTreeFeature extends Feature<NoneFeatureConfiguration> {
 
@@ -50,13 +49,14 @@ public abstract class PalmTreeFeature extends Feature<NoneFeatureConfiguration> 
     }
 
     protected void placeLog(final LevelSimulatedRW world, BlockPos pos) {
-        if (TreeFeature.isFree(world, pos)) {
+        if (TreeFeature.isAirOrLeaves(world, pos)) {
             setBlock(world, pos, getLog());
         }
     }
 
     private static final Direction[] DIRECTIONS = ArrayUtils.removeElement(Direction.values(), Direction.UP);
-    public static void spawnCoconuts(LevelSimulatedRW world, BlockPos pos, Random random, int chance, BlockState leaf) {
+
+    public static void spawnCoconuts(LevelSimulatedRW world, BlockPos pos, RandomSource random, int chance, BlockState leaf) {
         final BlockState coconut = TropicraftBlocks.COCONUT.get().defaultBlockState();
         for (Direction d : DIRECTIONS) {
             BlockPos pos2 = pos.relative(d);

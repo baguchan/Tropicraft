@@ -3,14 +3,13 @@ package net.tropicraft.core.common.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.tropicraft.core.common.dimension.TropicraftDimension;
-
-import java.util.Random;
 
 public class PortalWaterBlock extends LiquidBlock {
 
@@ -32,14 +31,14 @@ public class PortalWaterBlock extends LiquidBlock {
     }
 
     @Override
-    public void animateTick(BlockState stateIn, Level worldIn, BlockPos pos, Random rand) {
+    public void animateTick(BlockState stateIn, Level worldIn, BlockPos pos, RandomSource rand) {
         if (rand.nextInt(2) == 0) {
             double d0 = pos.getX();
             double d1 = pos.getY();
             double d2 = pos.getZ();
-            
+
             worldIn.addParticle(ParticleTypes.BUBBLE_COLUMN_UP, d0 + 0.5D, d1, d2 + 0.5D, 0.0D, 0.04D, 0.0D);
-            worldIn.addParticle(ParticleTypes.BUBBLE_COLUMN_UP, d0 + (double)rand.nextFloat(), d1 + (double)rand.nextFloat(), d2 + (double)rand.nextFloat(), 0.0D, 0.04D, 0.0D);
+            worldIn.addParticle(ParticleTypes.BUBBLE_COLUMN_UP, d0 + (double) rand.nextFloat(), d1 + (double) rand.nextFloat(), d2 + (double) rand.nextFloat(), 0.0D, 0.04D, 0.0D);
         }
     }
 }

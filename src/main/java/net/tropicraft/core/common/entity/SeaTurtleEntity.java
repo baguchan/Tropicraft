@@ -33,6 +33,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.fluids.FluidType;
 import net.tropicraft.core.common.dimension.TropicraftDimension;
 import net.tropicraft.core.common.entity.egg.SeaTurtleEggEntity;
 import net.tropicraft.core.common.item.TropicraftItems;
@@ -40,7 +41,9 @@ import net.tropicraft.core.common.item.TropicraftItems;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
+
+import net.minecraft.util.RandomSource;
+
 import java.util.Set;
 
 public class SeaTurtleEntity extends Turtle {
@@ -195,11 +198,10 @@ public class SeaTurtleEntity extends Turtle {
         return passengers.isEmpty() ? null : passengers.get(0);
     }
 
-    public static boolean canSpawnOnLand(EntityType<SeaTurtleEntity> turtle, LevelAccessor world, MobSpawnType reason, BlockPos pos, Random rand) {
-        return pos.getY() < TropicraftDimension.getSeaLevel(world) + 4 && world.getBlockState(pos.below()).getBlock() == Blocks.SAND && world.getRawBrightness(pos, 0) > 8;
-    }
+	public static boolean canSpawnOnLand(EntityType<SeaTurtleEntity> turtle, LevelAccessor world, MobSpawnType reason, BlockPos pos, RandomSource rand) {
+		return pos.getY() < TropicraftDimension.getSeaLevel(world) + 4 && world.getBlockState(pos.below()).getBlock() == Blocks.SAND && world.getRawBrightness(pos, 0) > 8;
+	}
 
-    @Override
     public boolean canBeControlledByRider() {
         return getControllingPassenger() instanceof LivingEntity;
     }
@@ -415,10 +417,10 @@ public class SeaTurtleEntity extends Turtle {
         return new ItemStack(TropicraftItems.SEA_TURTLE_SPAWN_EGG.get());
     }
 
-    @Override
-    public boolean canBeRiddenInWater(Entity rider) {
-        return true;
-    }
+	@Override
+	public boolean canBeRiddenUnderFluidType(FluidType type, Entity rider) {
+		return true;
+	}
 
     static class BetterLayEggGoal extends MoveToBlockGoal {
         private final SeaTurtleEntity turtle;
@@ -519,7 +521,7 @@ public class SeaTurtleEntity extends Turtle {
             this.turtle.setHasEgg(true);
             this.animal.resetLove();
             this.partner.resetLove();
-            Random random = this.animal.getRandom();
+			RandomSource random = this.animal.getRandom();
             if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
                 this.level.addFreshEntity(new ExperienceOrb(this.level, this.animal.getX(), this.animal.getY(), this.animal.getZ(), random.nextInt(7) + 1));
             }

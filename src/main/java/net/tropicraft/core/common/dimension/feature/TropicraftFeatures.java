@@ -4,35 +4,70 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.data.worldgen.features.FeatureUtils;
 import net.minecraft.data.worldgen.features.OreFeatures;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.random.WeightedRandomList;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.GenerationStep;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.feature.WeightedPlacedFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.*;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RandomBooleanFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.RandomPatchConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SimpleBlockConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.SimpleRandomFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
-import net.minecraft.world.level.levelgen.placement.*;
+import net.minecraft.world.level.levelgen.heightproviders.ConstantHeight;
+import net.minecraft.world.level.levelgen.placement.BiomeFilter;
+import net.minecraft.world.level.levelgen.placement.CountPlacement;
+import net.minecraft.world.level.levelgen.placement.InSquarePlacement;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import net.minecraft.world.level.levelgen.placement.RarityFilter;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
+import net.minecraft.world.level.levelgen.structure.TerrainAdjustment;
+import net.minecraft.world.level.levelgen.structure.structures.JigsawStructure;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.tropicraft.Constants;
+import net.tropicraft.core.common.TropicraftTags;
 import net.tropicraft.core.common.dimension.feature.config.RainforestVinesConfig;
-import net.tropicraft.core.common.dimension.feature.tree.*;
+import net.tropicraft.core.common.dimension.feature.pools.TropicraftTemplatePools;
+import net.tropicraft.core.common.dimension.feature.tree.CurvedPalmTreeFeature;
+import net.tropicraft.core.common.dimension.feature.tree.LargePalmTreeFeature;
+import net.tropicraft.core.common.dimension.feature.tree.NormalPalmTreeFeature;
+import net.tropicraft.core.common.dimension.feature.tree.PalmTreeFeature;
+import net.tropicraft.core.common.dimension.feature.tree.RainforestTreeFeature;
+import net.tropicraft.core.common.dimension.feature.tree.RainforestVinesFeature;
+import net.tropicraft.core.common.dimension.feature.tree.TallRainforestTreeFeature;
+import net.tropicraft.core.common.dimension.feature.tree.TualungFeature;
+import net.tropicraft.core.common.dimension.feature.tree.UpTreeFeature;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class TropicraftFeatures {
 
     public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, Constants.MODID);
-    public static final DeferredRegister<StructureFeature<?>> STRUCTURES = DeferredRegister.create(ForgeRegistries.STRUCTURE_FEATURES, Constants.MODID);
-
     public static final RegistryObject<PalmTreeFeature> NORMAL_PALM_TREE = register("normal_palm_tree", () -> new NormalPalmTreeFeature(NoneFeatureConfiguration.CODEC));
     public static final RegistryObject<PalmTreeFeature> CURVED_PALM_TREE = register("curved_palm_tree", () -> new CurvedPalmTreeFeature(NoneFeatureConfiguration.CODEC));
     public static final RegistryObject<PalmTreeFeature> LARGE_PALM_TREE = register("large_palm_tree", () -> new LargePalmTreeFeature(NoneFeatureConfiguration.CODEC));
@@ -46,8 +81,13 @@ public class TropicraftFeatures {
     public static final RegistryObject<RainforestVinesFeature> VINES = register("rainforest_vines", () -> new RainforestVinesFeature(RainforestVinesConfig.CODEC));
     public static final RegistryObject<UndergroundSeaPickleFeature> UNDERGROUND_SEA_PICKLE = register("underground_sea_pickle", () -> new UndergroundSeaPickleFeature(NoneFeatureConfiguration.CODEC));
 
-    public static final RegistryObject<StructureFeature<JigsawConfiguration>> KOA_VILLAGE = registerStructure("koa_village", new KoaVillageStructure(JigsawConfiguration.CODEC), GenerationStep.Decoration.SURFACE_STRUCTURES);
-    public static final RegistryObject<StructureFeature<JigsawConfiguration>> HOME_TREE = registerStructure("home_tree", new HomeTreeStructure(JigsawConfiguration.CODEC, HomeTreeStructure::checkLocation), GenerationStep.Decoration.SURFACE_STRUCTURES);
+    public static final Holder<Structure> KOA_VILLAGE = register(TropicraftBuildinStructures.KOA_VILLAGE, new JigsawStructure(structure(TropicraftTags.Biomes.HAS_KOA_VILLAGE, Arrays.stream(MobCategory.values()).collect(Collectors.toMap((p_236555_) -> {
+        return p_236555_;
+    }, (p_236551_) -> {
+        return new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.STRUCTURE, WeightedRandomList.create());
+    })), GenerationStep.Decoration.SURFACE_STRUCTURES, TerrainAdjustment.BEARD_THIN), holderOf(TropicraftTemplatePools.KOA_TOWN_CENTERS), Optional.empty(), 7, ConstantHeight.of(VerticalAnchor.absolute(0)), false, Optional.of(Heightmap.Types.WORLD_SURFACE_WG), 116));
+
+    public static final Holder<Structure> HOME_TREE = register(TropicraftBuildinStructures.HOME_TREE, new HomeTreeStructure(structure(TropicraftTags.Biomes.HAS_HOME_TREE, TerrainAdjustment.NONE)));
     public static final RegistryObject<CoffeePlantFeature> COFFEE_BUSH = register("coffee_bush", () -> new CoffeePlantFeature(NoneFeatureConfiguration.CODEC));
 
     public static final RegistryObject<ReedsFeature> REEDS = register("reeds", () -> new ReedsFeature(NoneFeatureConfiguration.CODEC));
@@ -57,10 +97,31 @@ public class TropicraftFeatures {
         return FEATURES.register(name, sup);
     }
 
-    private static <T extends StructureFeature<?>> RegistryObject<T> registerStructure(final String name, T structure, GenerationStep.Decoration step) {
-        StructureFeature.STEP.put(structure, step);
-        return STRUCTURES.register(name, () -> structure);
+    private static Holder<Structure> register(ResourceKey<Structure> pKey, Structure pStructure) {
+        return BuiltinRegistries.register(BuiltinRegistries.STRUCTURES, pKey, pStructure);
     }
+
+    private static Structure.StructureSettings structure(TagKey<Biome> pKey, Map<MobCategory, StructureSpawnOverride> pSpawnOverrides, GenerationStep.Decoration pDecoration, TerrainAdjustment pTerrainAdjustment) {
+        return new Structure.StructureSettings(biomes(pKey), pSpawnOverrides, pDecoration, pTerrainAdjustment);
+    }
+
+    private static HolderSet<Biome> biomes(TagKey<Biome> pKey) {
+        return BuiltinRegistries.BIOME.getOrCreateTag(pKey);
+    }
+
+    private static Structure.StructureSettings structure(TagKey<Biome> pKey, GenerationStep.Decoration pDecoration, TerrainAdjustment pTerrainAdjustment) {
+        return structure(pKey, Map.of(), pDecoration, pTerrainAdjustment);
+    }
+
+    private static Structure.StructureSettings structure(TagKey<Biome> pKey, TerrainAdjustment pTerrainAdjustment) {
+        return structure(pKey, Map.of(), GenerationStep.Decoration.SURFACE_STRUCTURES, pTerrainAdjustment);
+    }
+
+    //register those Builtin Structure
+    public static void init() {
+
+    }
+
 
     public static <T> Holder<T> holderOf(RegistryObject<T> object) {
         return object.getHolder().orElseThrow();

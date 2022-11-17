@@ -1,0 +1,11 @@
+{
+  "type": "tropicraft:tropics",
+  "generator": {
+    "biome_source": {
+      "preset": "tropicraft:tropics",
+      "type": "minecraft:multi_noise"
+    },
+    "settings": "tropicraft:tropics",
+    "type": "minecraft:noise"
+  }
+}

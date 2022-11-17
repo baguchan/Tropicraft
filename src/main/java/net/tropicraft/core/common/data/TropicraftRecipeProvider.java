@@ -1,7 +1,12 @@
 package net.tropicraft.core.common.data;
 
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.recipes.*;
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
+import net.minecraft.data.recipes.SingleItemRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -12,9 +17,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.Tags;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tropicraft.Constants;
 import net.tropicraft.core.common.TropicraftTags;
 import net.tropicraft.core.common.block.TropicraftFlower;
@@ -26,9 +32,151 @@ import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static net.tropicraft.core.common.block.TropicraftBlocks.*;
-import static net.tropicraft.core.common.block.TropicraftFlower.*;
-import static net.tropicraft.core.common.item.TropicraftItems.*;
+import static net.tropicraft.core.common.block.TropicraftBlocks.AIR_COMPRESSOR;
+import static net.tropicraft.core.common.block.TropicraftBlocks.AZURITE_BLOCK;
+import static net.tropicraft.core.common.block.TropicraftBlocks.BAMBOO_BOARDWALK;
+import static net.tropicraft.core.common.block.TropicraftBlocks.BAMBOO_BUNDLE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.BAMBOO_CHEST;
+import static net.tropicraft.core.common.block.TropicraftBlocks.BAMBOO_DOOR;
+import static net.tropicraft.core.common.block.TropicraftBlocks.BAMBOO_FENCE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.BAMBOO_FENCE_GATE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.BAMBOO_FLOWER_POT;
+import static net.tropicraft.core.common.block.TropicraftBlocks.BAMBOO_LADDER;
+import static net.tropicraft.core.common.block.TropicraftBlocks.BAMBOO_SLAB;
+import static net.tropicraft.core.common.block.TropicraftBlocks.BAMBOO_STAIRS;
+import static net.tropicraft.core.common.block.TropicraftBlocks.BAMBOO_TRAPDOOR;
+import static net.tropicraft.core.common.block.TropicraftBlocks.BLACK_MANGROVE_LOG;
+import static net.tropicraft.core.common.block.TropicraftBlocks.BLACK_MANGROVE_WOOD;
+import static net.tropicraft.core.common.block.TropicraftBlocks.CHUNK;
+import static net.tropicraft.core.common.block.TropicraftBlocks.CHUNK_FENCE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.CHUNK_FENCE_GATE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.CHUNK_SLAB;
+import static net.tropicraft.core.common.block.TropicraftBlocks.CHUNK_STAIRS;
+import static net.tropicraft.core.common.block.TropicraftBlocks.CHUNK_WALL;
+import static net.tropicraft.core.common.block.TropicraftBlocks.DRINK_MIXER;
+import static net.tropicraft.core.common.block.TropicraftBlocks.EUDIALYTE_BLOCK;
+import static net.tropicraft.core.common.block.TropicraftBlocks.IRIS;
+import static net.tropicraft.core.common.block.TropicraftBlocks.LARGE_BONGO_DRUM;
+import static net.tropicraft.core.common.block.TropicraftBlocks.LIGHT_MANGROVE_LOG;
+import static net.tropicraft.core.common.block.TropicraftBlocks.LIGHT_MANGROVE_WOOD;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MAHOGANY_BOARDWALK;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MAHOGANY_DOOR;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MAHOGANY_FENCE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MAHOGANY_FENCE_GATE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MAHOGANY_LOG;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MAHOGANY_PLANKS;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MAHOGANY_SLAB;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MAHOGANY_STAIRS;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MAHOGANY_TRAPDOOR;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MAHOGANY_WOOD;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MANGANESE_BLOCK;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MANGROVE_BOARDWALK;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MANGROVE_DOOR;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MANGROVE_FENCE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MANGROVE_FENCE_GATE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MANGROVE_PLANKS;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MANGROVE_SLAB;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MANGROVE_STAIRS;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MANGROVE_TRAPDOOR;
+import static net.tropicraft.core.common.block.TropicraftBlocks.MEDIUM_BONGO_DRUM;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PACKED_PURIFIED_SAND;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PALM_BOARDWALK;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PALM_DOOR;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PALM_FENCE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PALM_FENCE_GATE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PALM_LOG;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PALM_PLANKS;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PALM_SLAB;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PALM_STAIRS;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PALM_TRAPDOOR;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PALM_WOOD;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PAPAYA_LOG;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PAPAYA_WOOD;
+import static net.tropicraft.core.common.block.TropicraftBlocks.PURIFIED_SAND;
+import static net.tropicraft.core.common.block.TropicraftBlocks.RED_MANGROVE_LOG;
+import static net.tropicraft.core.common.block.TropicraftBlocks.RED_MANGROVE_WOOD;
+import static net.tropicraft.core.common.block.TropicraftBlocks.SHAKA_BLOCK;
+import static net.tropicraft.core.common.block.TropicraftBlocks.SIFTER;
+import static net.tropicraft.core.common.block.TropicraftBlocks.SMALL_BONGO_DRUM;
+import static net.tropicraft.core.common.block.TropicraftBlocks.STRIPPED_MANGROVE_LOG;
+import static net.tropicraft.core.common.block.TropicraftBlocks.STRIPPED_MANGROVE_WOOD;
+import static net.tropicraft.core.common.block.TropicraftBlocks.THATCH_BUNDLE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.THATCH_DOOR;
+import static net.tropicraft.core.common.block.TropicraftBlocks.THATCH_FENCE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.THATCH_FENCE_GATE;
+import static net.tropicraft.core.common.block.TropicraftBlocks.THATCH_SLAB;
+import static net.tropicraft.core.common.block.TropicraftBlocks.THATCH_STAIRS;
+import static net.tropicraft.core.common.block.TropicraftBlocks.THATCH_STAIRS_FUZZY;
+import static net.tropicraft.core.common.block.TropicraftBlocks.THATCH_TRAPDOOR;
+import static net.tropicraft.core.common.block.TropicraftBlocks.TIKI_TORCH;
+import static net.tropicraft.core.common.block.TropicraftBlocks.ZIRCONIUM_BLOCK;
+import static net.tropicraft.core.common.block.TropicraftBlocks.ZIRCON_BLOCK;
+import static net.tropicraft.core.common.block.TropicraftFlower.CANNA;
+import static net.tropicraft.core.common.block.TropicraftFlower.COMMELINA_DIFFUSA;
+import static net.tropicraft.core.common.block.TropicraftFlower.DRACAENA;
+import static net.tropicraft.core.common.block.TropicraftFlower.ORANGE_ANTHURIUM;
+import static net.tropicraft.core.common.block.TropicraftFlower.RED_ANTHURIUM;
+import static net.tropicraft.core.common.item.TropicraftItems.AZURITE;
+import static net.tropicraft.core.common.item.TropicraftItems.BAMBOO_ITEM_FRAME;
+import static net.tropicraft.core.common.item.TropicraftItems.BAMBOO_MUG;
+import static net.tropicraft.core.common.item.TropicraftItems.BAMBOO_SPEAR;
+import static net.tropicraft.core.common.item.TropicraftItems.BAMBOO_STICK;
+import static net.tropicraft.core.common.item.TropicraftItems.BEACH_FLOATS;
+import static net.tropicraft.core.common.item.TropicraftItems.BLOW_GUN;
+import static net.tropicraft.core.common.item.TropicraftItems.CHAIRS;
+import static net.tropicraft.core.common.item.TropicraftItems.COCKTAILS;
+import static net.tropicraft.core.common.item.TropicraftItems.COCONUT_CHUNK;
+import static net.tropicraft.core.common.item.TropicraftItems.COFFEE_BERRY;
+import static net.tropicraft.core.common.item.TropicraftItems.COOKED_FISH;
+import static net.tropicraft.core.common.item.TropicraftItems.COOKED_FROG_LEG;
+import static net.tropicraft.core.common.item.TropicraftItems.COOKED_RAY;
+import static net.tropicraft.core.common.item.TropicraftItems.DAGGER;
+import static net.tropicraft.core.common.item.TropicraftItems.EUDIALYTE;
+import static net.tropicraft.core.common.item.TropicraftItems.EUDIALYTE_AXE;
+import static net.tropicraft.core.common.item.TropicraftItems.EUDIALYTE_HOE;
+import static net.tropicraft.core.common.item.TropicraftItems.EUDIALYTE_PICKAXE;
+import static net.tropicraft.core.common.item.TropicraftItems.EUDIALYTE_SHOVEL;
+import static net.tropicraft.core.common.item.TropicraftItems.EUDIALYTE_SWORD;
+import static net.tropicraft.core.common.item.TropicraftItems.FRESH_MARLIN;
+import static net.tropicraft.core.common.item.TropicraftItems.FROG_LEG;
+import static net.tropicraft.core.common.item.TropicraftItems.IGUANA_LEATHER;
+import static net.tropicraft.core.common.item.TropicraftItems.MANGANESE;
+import static net.tropicraft.core.common.item.TropicraftItems.PINEAPPLE_CUBES;
+import static net.tropicraft.core.common.item.TropicraftItems.PINK_PONY_BOTTLE;
+import static net.tropicraft.core.common.item.TropicraftItems.PINK_SCUBA_FLIPPERS;
+import static net.tropicraft.core.common.item.TropicraftItems.PINK_SCUBA_GOGGLES;
+import static net.tropicraft.core.common.item.TropicraftItems.PINK_SCUBA_HARNESS;
+import static net.tropicraft.core.common.item.TropicraftItems.RAW_COFFEE_BEAN;
+import static net.tropicraft.core.common.item.TropicraftItems.RAW_FISH;
+import static net.tropicraft.core.common.item.TropicraftItems.RAW_RAY;
+import static net.tropicraft.core.common.item.TropicraftItems.ROASTED_COFFEE_BEAN;
+import static net.tropicraft.core.common.item.TropicraftItems.SCALE;
+import static net.tropicraft.core.common.item.TropicraftItems.SCALE_BOOTS;
+import static net.tropicraft.core.common.item.TropicraftItems.SCALE_CHESTPLATE;
+import static net.tropicraft.core.common.item.TropicraftItems.SCALE_HELMET;
+import static net.tropicraft.core.common.item.TropicraftItems.SCALE_LEGGINGS;
+import static net.tropicraft.core.common.item.TropicraftItems.SEARED_MARLIN;
+import static net.tropicraft.core.common.item.TropicraftItems.SHAKA;
+import static net.tropicraft.core.common.item.TropicraftItems.TOASTED_NORI;
+import static net.tropicraft.core.common.item.TropicraftItems.TROPICAL_FERTILIZER;
+import static net.tropicraft.core.common.item.TropicraftItems.UMBRELLAS;
+import static net.tropicraft.core.common.item.TropicraftItems.WATER_WAND;
+import static net.tropicraft.core.common.item.TropicraftItems.YELLOW_PONY_BOTTLE;
+import static net.tropicraft.core.common.item.TropicraftItems.YELLOW_SCUBA_FLIPPERS;
+import static net.tropicraft.core.common.item.TropicraftItems.YELLOW_SCUBA_GOGGLES;
+import static net.tropicraft.core.common.item.TropicraftItems.YELLOW_SCUBA_HARNESS;
+import static net.tropicraft.core.common.item.TropicraftItems.ZIRCON;
+import static net.tropicraft.core.common.item.TropicraftItems.ZIRCONIUM;
+import static net.tropicraft.core.common.item.TropicraftItems.ZIRCONIUM_AXE;
+import static net.tropicraft.core.common.item.TropicraftItems.ZIRCONIUM_HOE;
+import static net.tropicraft.core.common.item.TropicraftItems.ZIRCONIUM_PICKAXE;
+import static net.tropicraft.core.common.item.TropicraftItems.ZIRCONIUM_SHOVEL;
+import static net.tropicraft.core.common.item.TropicraftItems.ZIRCONIUM_SWORD;
+import static net.tropicraft.core.common.item.TropicraftItems.ZIRCON_AXE;
+import static net.tropicraft.core.common.item.TropicraftItems.ZIRCON_HOE;
+import static net.tropicraft.core.common.item.TropicraftItems.ZIRCON_PICKAXE;
+import static net.tropicraft.core.common.item.TropicraftItems.ZIRCON_SHOVEL;
+import static net.tropicraft.core.common.item.TropicraftItems.ZIRCON_SWORD;
 
 public class TropicraftRecipeProvider extends RecipeProvider {
 
@@ -141,36 +289,36 @@ public class TropicraftRecipeProvider extends RecipeProvider {
         ShapedRecipeBuilder.shaped(BAMBOO_MUG.get())
             .pattern("X X").pattern("X X").pattern("XXX")
             .define('X', Items.BAMBOO)
-            .unlockedBy("has_bamboo", has(Items.BAMBOO))
-            .save(consumer);
+				.unlockedBy("has_bamboo", has(Items.BAMBOO))
+				.save(consumer);
 
-        food(Items.SEAGRASS.delegate, TOASTED_NORI, 0.1F, consumer);
-        food(FRESH_MARLIN, SEARED_MARLIN, 0.15F, consumer);
-        food(RAW_RAY, COOKED_RAY, 0.15F, consumer);
-        food(FROG_LEG, COOKED_FROG_LEG, 0.1F, consumer);
-        food(RAW_FISH, COOKED_FISH, 0.1F, consumer);
-        
-        // Flowers to dye
-        dye(COMMELINA_DIFFUSA, Items.LIGHT_BLUE_DYE.delegate, 1, 2, consumer);
-        dye(CANNA, Items.YELLOW_DYE.delegate, 1, 2, consumer);
-        dye(ORANGE_ANTHURIUM, Items.ORANGE_DYE.delegate, 1, 2, consumer);
-        dye(RED_ANTHURIUM, Items.RED_DYE.delegate, 1, 2, consumer);
-        dye(DRACAENA, Items.GREEN_DYE.delegate, 1, 2, consumer);
-        dye(IRIS, Items.PURPLE_DYE.delegate, 1, 4, consumer);
+		food(() -> Items.SEAGRASS, TOASTED_NORI, 0.1F, consumer);
+		food(FRESH_MARLIN, SEARED_MARLIN, 0.15F, consumer);
+		food(RAW_RAY, COOKED_RAY, 0.15F, consumer);
+		food(FROG_LEG, COOKED_FROG_LEG, 0.1F, consumer);
+		food(RAW_FISH, COOKED_FISH, 0.1F, consumer);
 
-        // Bundles
-        singleItem(Blocks.BAMBOO.delegate, BAMBOO_BUNDLE, 9, 1, consumer);
-        singleItem(Blocks.SUGAR_CANE.delegate, THATCH_BUNDLE, 9, 1, consumer);
-        
-        // Planks
-        planks(MAHOGANY_LOG, MAHOGANY_PLANKS, consumer);
-        planks(PALM_LOG, PALM_PLANKS, consumer);
-        ShapelessRecipeBuilder.shapeless(MANGROVE_PLANKS.get(), 4)
-            .requires(TropicraftTags.Items.MANGROVE_LOGS)
-            .unlockedBy("has_light_mangrove_log", has(LIGHT_MANGROVE_LOG.get()))
-            .unlockedBy("has_red_mangrove_log", has(RED_MANGROVE_LOG.get()))
-            .unlockedBy("has_black_mangrove_log", has(BLACK_MANGROVE_LOG.get()))
-            .save(consumer);
+		// Flowers to dye
+		dye(COMMELINA_DIFFUSA, () -> Items.LIGHT_BLUE_DYE, 1, 2, consumer);
+		dye(CANNA, () -> Items.YELLOW_DYE, 1, 2, consumer);
+		dye(ORANGE_ANTHURIUM, () -> Items.ORANGE_DYE, 1, 2, consumer);
+		dye(RED_ANTHURIUM, () -> Items.RED_DYE, 1, 2, consumer);
+		dye(DRACAENA, () -> Items.GREEN_DYE, 1, 2, consumer);
+		dye(IRIS, () -> Items.PURPLE_DYE, 1, 4, consumer);
+
+		// Bundles
+		singleItem(() -> Blocks.BAMBOO, BAMBOO_BUNDLE, 9, 1, consumer);
+		singleItem(() -> Blocks.SUGAR_CANE, THATCH_BUNDLE, 9, 1, consumer);
+
+		// Planks
+		planks(MAHOGANY_LOG, MAHOGANY_PLANKS, consumer);
+		planks(PALM_LOG, PALM_PLANKS, consumer);
+		ShapelessRecipeBuilder.shapeless(MANGROVE_PLANKS.get(), 4)
+				.requires(TropicraftTags.Items.MANGROVE_LOGS)
+				.unlockedBy("has_light_mangrove_log", has(LIGHT_MANGROVE_LOG.get()))
+				.unlockedBy("has_red_mangrove_log", has(RED_MANGROVE_LOG.get()))
+				.unlockedBy("has_black_mangrove_log", has(BLACK_MANGROVE_LOG.get()))
+				.save(consumer);
         
         bark(MAHOGANY_LOG, MAHOGANY_WOOD, consumer);
         bark(PALM_LOG, PALM_WOOD, consumer);
@@ -247,36 +395,36 @@ public class TropicraftRecipeProvider extends RecipeProvider {
         trapDoor(MAHOGANY_PLANKS, MAHOGANY_TRAPDOOR, "wooden_trapdoor", consumer);
         trapDoor(MANGROVE_PLANKS, MANGROVE_TRAPDOOR, "wooden_trapdoor", consumer);
 
-        trapDoor(THATCH_BUNDLE, THATCH_TRAPDOOR, null, consumer);
-        trapDoor(BAMBOO_BUNDLE, BAMBOO_TRAPDOOR, null, consumer);
-        
-        // Bongos
-        bongo(IGUANA_LEATHER, MAHOGANY_PLANKS, 1, SMALL_BONGO_DRUM, consumer);
-        bongo(IGUANA_LEATHER, MAHOGANY_PLANKS, 2, MEDIUM_BONGO_DRUM, consumer);
-        bongo(IGUANA_LEATHER, MAHOGANY_PLANKS, 3, LARGE_BONGO_DRUM, consumer);
+		trapDoor(THATCH_BUNDLE, THATCH_TRAPDOOR, null, consumer);
+		trapDoor(BAMBOO_BUNDLE, BAMBOO_TRAPDOOR, null, consumer);
 
-        // Scuba gear
-        goggles(PINK_SCUBA_GOGGLES, Items.PINK_DYE.delegate, consumer);
-        goggles(YELLOW_SCUBA_GOGGLES, Items.YELLOW_DYE.delegate, consumer);
+		// Bongos
+		bongo(IGUANA_LEATHER, MAHOGANY_PLANKS, 1, SMALL_BONGO_DRUM, consumer);
+		bongo(IGUANA_LEATHER, MAHOGANY_PLANKS, 2, MEDIUM_BONGO_DRUM, consumer);
+		bongo(IGUANA_LEATHER, MAHOGANY_PLANKS, 3, LARGE_BONGO_DRUM, consumer);
 
-        flippers(PINK_SCUBA_FLIPPERS, Items.PINK_DYE.delegate, consumer);
-        flippers(YELLOW_SCUBA_FLIPPERS, Items.YELLOW_DYE.delegate, consumer);
+		// Scuba gear
+		goggles(PINK_SCUBA_GOGGLES, () -> Items.PINK_DYE, consumer);
+		goggles(YELLOW_SCUBA_GOGGLES, () -> Items.YELLOW_DYE, consumer);
 
-        harness(PINK_SCUBA_HARNESS, Items.PINK_DYE.delegate, consumer);
-        harness(YELLOW_SCUBA_HARNESS, Items.YELLOW_DYE.delegate, consumer);
+		flippers(PINK_SCUBA_FLIPPERS, () -> Items.PINK_DYE, consumer);
+		flippers(YELLOW_SCUBA_FLIPPERS, () -> Items.YELLOW_DYE, consumer);
 
-        ponyBottle(PINK_PONY_BOTTLE, Items.PINK_DYE.delegate, consumer);
-        ponyBottle(YELLOW_PONY_BOTTLE, Items.YELLOW_DYE.delegate, consumer);
+		harness(PINK_SCUBA_HARNESS, () -> Items.PINK_DYE, consumer);
+		harness(YELLOW_SCUBA_HARNESS, () -> Items.YELLOW_DYE, consumer);
 
-        ShapedRecipeBuilder.shaped(WATER_WAND.get(), 1)
-            .pattern("  X")
-            .pattern(" Y ")
-            .pattern("Y  ")
-            .define('X', AZURITE.get())
-            .define('Y', Items.GOLD_INGOT)
-            .unlockedBy("has_" + safeName(AZURITE.get()), has(AZURITE.get()))
-            .unlockedBy("has_gold_ingot", has(Items.GOLD_INGOT))
-            .save(consumer);
+		ponyBottle(PINK_PONY_BOTTLE, () -> Items.PINK_DYE, consumer);
+		ponyBottle(YELLOW_PONY_BOTTLE, () -> Items.YELLOW_DYE, consumer);
+
+		ShapedRecipeBuilder.shaped(WATER_WAND.get(), 1)
+				.pattern("  X")
+				.pattern(" Y ")
+				.pattern("Y  ")
+				.define('X', AZURITE.get())
+				.define('Y', Items.GOLD_INGOT)
+				.unlockedBy("has_" + safeName(AZURITE.get()), has(AZURITE.get()))
+				.unlockedBy("has_gold_ingot", has(Items.GOLD_INGOT))
+				.save(consumer);
 
         ShapedRecipeBuilder.shaped(BAMBOO_ITEM_FRAME.get(), 1)
             .pattern("XXX")
@@ -379,335 +527,343 @@ public class TropicraftRecipeProvider extends RecipeProvider {
             .pattern(" I ")
             .pattern("  X")
             .define('X', BAMBOO_STICK.get())
-            .define('I', ZIRCON.get())
-            .unlockedBy("has_" + safeName(ZIRCON.get()), has(ZIRCON.get()))
-            .unlockedBy("has_" + safeName(BAMBOO_STICK.get()), has(BAMBOO_STICK.get()))
-            .save(consumer);
-    }
-    
-    private ResourceLocation safeId(ResourceLocation id) {
-        return new ResourceLocation(id.getNamespace(), safeName(id));
-    }
-    
-    private ResourceLocation safeId(IForgeRegistryEntry<?> registryEntry) {
-        return safeId(registryEntry.getRegistryName());
-    }
-    
-    private String safeName(ResourceLocation nameSource) {
-        return nameSource.getPath().replace('/', '_');
-    }
-    
-    private String safeName(IForgeRegistryEntry<?> registryEntry) {
-        return safeName(registryEntry.getRegistryName());
-    }
-    
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void ore(TagKey<Item> source, Supplier<T> result, float xp, Consumer<FinishedRecipe> consumer) {
-        SimpleCookingRecipeBuilder.smelting(Ingredient.of(source), result.get(), xp, 100)
-            .unlockedBy("has_" + safeName(source.location()), has(source))
-            .save(consumer);
-        SimpleCookingRecipeBuilder.blasting(Ingredient.of(source), result.get(), xp, 100)
-            .unlockedBy("has_" + safeName(source.location()), has(source))
-            .save(consumer, safeId(result.get()) + "_from_blasting");
+				.define('I', ZIRCON.get())
+				.unlockedBy("has_" + safeName(ZIRCON.get()), has(ZIRCON.get()))
+				.unlockedBy("has_" + safeName(BAMBOO_STICK.get()), has(BAMBOO_STICK.get()))
+				.save(consumer);
+	}
+
+	private ResourceLocation safeId(ResourceLocation id) {
+		return new ResourceLocation(id.getNamespace(), safeName(id));
+	}
+
+	private ResourceLocation safeId(Item registryEntry) {
+		return safeId(ForgeRegistries.ITEMS.getKey(registryEntry));
+	}
+
+	private ResourceLocation safeId(Block registryEntry) {
+		return safeId(ForgeRegistries.ITEMS.getKey(registryEntry.asItem()));
+	}
+
+	private String safeName(ResourceLocation nameSource) {
+		return nameSource.getPath().replace('/', '_');
+	}
+
+	private String safeName(Item registryEntry) {
+		return safeName(ForgeRegistries.ITEMS.getKey(registryEntry));
+	}
+
+	private String safeName(Block registryEntry) {
+		return safeName(ForgeRegistries.ITEMS.getKey(registryEntry.asItem()));
+	}
+
+	private <T extends ItemLike> void ore(TagKey<Item> source, Supplier<T> result, float xp, Consumer<FinishedRecipe> consumer) {
+		SimpleCookingRecipeBuilder.smelting(Ingredient.of(source), result.get(), xp, 100)
+				.unlockedBy("has_" + safeName(source.location()), has(source))
+				.save(consumer);
+		SimpleCookingRecipeBuilder.blasting(Ingredient.of(source), result.get(), xp, 100)
+				.unlockedBy("has_" + safeName(source.location()), has(source))
+				.save(consumer, safeId(ForgeRegistries.ITEMS.getKey(result.get().asItem())) + "_from_blasting");
+	}
+
+	private <T extends ItemLike> void food(Supplier<? extends T> source, Supplier<? extends T> result, float xp, Consumer<FinishedRecipe> consumer) {
+		SimpleCookingRecipeBuilder.smelting(Ingredient.of(source.get()), result.get(), xp, 100)
+				.unlockedBy("has_" + safeName(ForgeRegistries.ITEMS.getKey(source.get().asItem())), has(source.get()))
+				.save(consumer);
+		SimpleCookingRecipeBuilder.cooking(Ingredient.of(source.get()), result.get(), xp, 100, RecipeSerializer.SMOKING_RECIPE)
+				.unlockedBy("has_" + safeName(ForgeRegistries.ITEMS.getKey(source.get().asItem())), has(source.get()))
+				.save(consumer, safeId(ForgeRegistries.ITEMS.getKey(result.get().asItem())) + "_from_smoking");
+		SimpleCookingRecipeBuilder.cooking(Ingredient.of(source.get()), result.get(), xp, 100, RecipeSerializer.CAMPFIRE_COOKING_RECIPE)
+				.unlockedBy("has_" + safeName(ForgeRegistries.ITEMS.getKey(source.get().asItem())), has(source.get()))
+				.save(consumer, safeId(ForgeRegistries.ITEMS.getKey(result.get().asItem())) + "_from_campfire");
+	}
+
+	private <T extends ItemLike> void storage(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
+		// TODO probably not ported correctly
+		ShapedRecipeBuilder.shaped(output.get())
+				.pattern("XXX").pattern("XXX").pattern("XXX")
+				.define('X', input.get())
+				.unlockedBy("has_at_least_9_" + safeName(ForgeRegistries.ITEMS.getKey(input.get().asItem())), has(input.get()))
+				.save(consumer);
+
+		ShapelessRecipeBuilder.shapeless(input.get(), 9)
+				.requires(output.get())
+				.unlockedBy("has_" + safeName(ForgeRegistries.ITEMS.getKey(output.get().asItem())), has(output.get()))
+				.save(consumer, safeId(ForgeRegistries.ITEMS.getKey(input.get().asItem())) + "_from_" + safeName(ForgeRegistries.ITEMS.getKey(output.get().asItem())));
     }
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void food(Supplier<? extends T> source, Supplier<? extends T> result, float xp, Consumer<FinishedRecipe> consumer) {
-        SimpleCookingRecipeBuilder.smelting(Ingredient.of(source.get()), result.get(), xp, 100)
-            .unlockedBy("has_" + safeName(source.get().getRegistryName()), has(source.get()))
-            .save(consumer);
-        SimpleCookingRecipeBuilder.cooking(Ingredient.of(source.get()), result.get(), xp, 100, RecipeSerializer.SMOKING_RECIPE)
-            .unlockedBy("has_" + safeName(source.get().getRegistryName()), has(source.get()))
-            .save(consumer, safeId(result.get()) + "_from_smoking");
-        SimpleCookingRecipeBuilder.cooking(Ingredient.of(source.get()), result.get(), xp, 100, RecipeSerializer.CAMPFIRE_COOKING_RECIPE)
-            .unlockedBy("has_" + safeName(source.get().getRegistryName()), has(source.get()))
-            .save(consumer, safeId(result.get()) + "_from_campfire");
-    }
-    
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void storage(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
-        // TODO probably not ported correctly
-        ShapedRecipeBuilder.shaped(output.get())
-            .pattern("XXX").pattern("XXX").pattern("XXX")
-            .define('X', input.get())
-            .unlockedBy("has_at_least_9_" + safeName(input.get()), has(input.get()))
-            .save(consumer);
-        
-        ShapelessRecipeBuilder.shapeless(input.get(), 9)
-            .requires(output.get())
-            .unlockedBy("has_" + safeName(output.get()), has(output.get()))
-            .save(consumer, safeId(input.get()) + "_from_" + safeName(output.get()));
-    }
+	private <T extends ItemLike> void pickaxe(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(output.get())
+				.pattern("XXX")
+				.pattern(" B ")
+				.pattern(" B ")
+				.define('X', input.get())
+				.define('B', BAMBOO_STICK.get())
+				.unlockedBy("has_" + safeName(ForgeRegistries.ITEMS.getKey(input.get().asItem())), has(input.get()))
+				.unlockedBy("has_" + safeName(Items.BAMBOO), has(Items.BAMBOO))
+				.save(consumer);
+	}
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void pickaxe(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(output.get())
-                .pattern("XXX")
-                .pattern(" B ")
-                .pattern(" B ")
-                .define('X', input.get())
-                .define('B', BAMBOO_STICK.get())
-                .unlockedBy("has_" + safeName(input.get()), has(input.get()))
-                .unlockedBy("has_" + safeName(Items.BAMBOO), has(Items.BAMBOO))
-                .save(consumer);
-    }
+	private <T extends ItemLike> void shovel(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(output.get())
+				.pattern(" X ")
+				.pattern(" B ")
+				.pattern(" B ")
+				.define('X', input.get())
+				.define('B', BAMBOO_STICK.get())
+				.unlockedBy("has_" + safeName(input.get().asItem()), has(input.get()))
+				.unlockedBy("has_" + safeName(Items.BAMBOO), has(Items.BAMBOO))
+				.save(consumer);
+	}
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void shovel(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(output.get())
-                .pattern(" X ")
-                .pattern(" B ")
-                .pattern(" B ")
-                .define('X', input.get())
-                .define('B', BAMBOO_STICK.get())
-                .unlockedBy("has_" + safeName(input.get()), has(input.get()))
-                .unlockedBy("has_" + safeName(Items.BAMBOO), has(Items.BAMBOO))
-                .save(consumer);
-    }
+	private <T extends ItemLike> void axe(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(output.get())
+				.pattern("XX ")
+				.pattern("XB ")
+				.pattern(" B ")
+				.define('X', input.get())
+				.define('B', BAMBOO_STICK.get())
+				.unlockedBy("has_" + safeName(input.get().asItem()), has(input.get()))
+				.unlockedBy("has_" + safeName(Items.BAMBOO), has(Items.BAMBOO))
+				.save(consumer);
+	}
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void axe(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(output.get())
-                .pattern("XX ")
-                .pattern("XB ")
-                .pattern(" B ")
-                .define('X', input.get())
-                .define('B', BAMBOO_STICK.get())
-                .unlockedBy("has_" + safeName(input.get()), has(input.get()))
-                .unlockedBy("has_" + safeName(Items.BAMBOO), has(Items.BAMBOO))
-                .save(consumer);
-    }
+	private <T extends ItemLike> void hoe(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(output.get())
+				.pattern("XX ")
+				.pattern(" B ")
+				.pattern(" B ")
+				.define('X', input.get())
+				.define('B', BAMBOO_STICK.get())
+				.unlockedBy("has_" + safeName(input.get().asItem()), has(input.get()))
+				.unlockedBy("has_" + safeName(Items.BAMBOO), has(Items.BAMBOO))
+				.save(consumer);
+	}
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void hoe(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(output.get())
-                .pattern("XX ")
-                .pattern(" B ")
-                .pattern(" B ")
-                .define('X', input.get())
-                .define('B', BAMBOO_STICK.get())
-                .unlockedBy("has_" + safeName(input.get()), has(input.get()))
-                .unlockedBy("has_" + safeName(Items.BAMBOO), has(Items.BAMBOO))
-                .save(consumer);
-    }
+	private <T extends ItemLike> void sword(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(output.get())
+				.pattern(" X ")
+				.pattern(" X ")
+				.pattern(" B ")
+				.define('X', input.get())
+				.define('B', BAMBOO_STICK.get())
+				.unlockedBy("has_" + safeName(input.get().asItem()), has(input.get()))
+				.unlockedBy("has_" + safeName(Items.BAMBOO), has(Items.BAMBOO))
+				.save(consumer);
+	}
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void sword(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(output.get())
-                .pattern(" X ")
-                .pattern(" X ")
-                .pattern(" B ")
-                .define('X', input.get())
-                .define('B', BAMBOO_STICK.get())
-                .unlockedBy("has_" + safeName(input.get()), has(input.get()))
-                .unlockedBy("has_" + safeName(Items.BAMBOO), has(Items.BAMBOO))
-                .save(consumer);
-    }
+	private <T extends ItemLike> void helmet(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(output.get())
+				.pattern("XXX")
+				.pattern("X X")
+				.define('X', input.get())
+				.unlockedBy("has_" + safeName(input.get().asItem()), has(input.get()))
+				.save(consumer);
+	}
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void helmet(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(output.get())
-                .pattern("XXX")
-                .pattern("X X")
-                .define('X', input.get())
-                .unlockedBy("has_" + safeName(input.get()), has(input.get()))
-                .save(consumer);
-    }
+	private <T extends ItemLike> void chestplate(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(output.get())
+				.pattern("X X")
+				.pattern("XXX")
+				.pattern("XXX")
+				.define('X', input.get())
+				.unlockedBy("has_" + safeName(input.get().asItem()), has(input.get()))
+				.save(consumer);
+	}
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void chestplate(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(output.get())
-                .pattern("X X")
-                .pattern("XXX")
-                .pattern("XXX")
-                .define('X', input.get())
-                .unlockedBy("has_" + safeName(input.get()), has(input.get()))
-                .save(consumer);
-    }
+	private <T extends ItemLike> void leggings(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(output.get())
+				.pattern("XXX")
+				.pattern("X X")
+				.pattern("X X")
+				.define('X', input.get())
+				.unlockedBy("has_" + safeName(input.get().asItem()), has(input.get()))
+				.save(consumer);
+	}
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void leggings(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(output.get())
-                .pattern("XXX")
-                .pattern("X X")
-                .pattern("X X")
-                .define('X', input.get())
-                .unlockedBy("has_" + safeName(input.get()), has(input.get()))
-                .save(consumer);
-    }
+	private <T extends ItemLike> void boots(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(output.get())
+				.pattern("X X")
+				.pattern("X X")
+				.define('X', input.get())
+				.unlockedBy("has_" + safeName(input.get().asItem()), has(input.get()))
+				.save(consumer);
+	}
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void boots(Supplier<? extends T> input, Supplier<? extends T> output, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(output.get())
-                .pattern("X X")
-                .pattern("X X")
-                .define('X', input.get())
-                .unlockedBy("has_" + safeName(input.get()), has(input.get()))
-                .save(consumer);
-    }
+	@CheckReturnValue
+	private <T extends ItemLike> ShapelessRecipeBuilder singleItemUnfinished(Supplier<? extends T> source, Supplier<? extends T> result, int required, int amount) {
+		return ShapelessRecipeBuilder.shapeless(result.get(), amount)
+				.requires(source.get(), required)
+				.unlockedBy("has_" + safeName(source.get().asItem()), has(source.get()));
+	}
 
-    @CheckReturnValue
-    private <T extends ItemLike & IForgeRegistryEntry<?>> ShapelessRecipeBuilder singleItemUnfinished(Supplier<? extends T> source, Supplier<? extends T> result, int required, int amount) {
-        return ShapelessRecipeBuilder.shapeless(result.get(), amount)
-            .requires(source.get(), required)
-            .unlockedBy("has_" + safeName(source.get()), has(source.get()));
-    }
+	private <T extends ItemLike> void dye(Supplier<? extends T> source, Supplier<? extends T> result, int required, int amount, Consumer<FinishedRecipe> consumer) {
+		singleItemUnfinished(source, result, required, amount).save(consumer, new ResourceLocation(Constants.MODID, ForgeRegistries.ITEMS.getKey(result.get().asItem()).getPath()));
+	}
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void dye(Supplier<? extends T> source, Supplier<? extends T> result, int required, int amount, Consumer<FinishedRecipe> consumer) {
-        singleItemUnfinished(source, result, required, amount).save(consumer, new ResourceLocation(Constants.MODID, result.get().getRegistryName().getPath()));
-    }
-    
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void singleItem(Supplier<? extends T> source, Supplier<? extends T> result, int required, int amount, Consumer<FinishedRecipe> consumer) {
-        singleItemUnfinished(source, result, required, amount).save(consumer);
-    }
-    
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void planks(Supplier<? extends T> source, Supplier<? extends T> result, Consumer<FinishedRecipe> consumer) {
-        singleItemUnfinished(source, result, 1, 4)
-            .group("planks")
-            .save(consumer);
-    }
-    
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void bark(Supplier<? extends T> source, Supplier<? extends T> result, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get(), 3)
-            .pattern("##").pattern("##")
-            .define('#', source.get())
-            .group("bark")
-            .unlockedBy("has_log", has(Blocks.ACACIA_LOG))
-            .save(consumer);
-    }
-    
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void stairs(Supplier<? extends T> source, Supplier<? extends T> result, @Nullable String group, boolean stone, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get(), 4)
-            .pattern("X  ").pattern("XX ").pattern("XXX")
-            .define('X', source.get())
-            .group(group)
-            .unlockedBy("has_" + safeName(source.get()), has(source.get()))
-            .save(consumer);
-        if (stone) {
-            SingleItemRecipeBuilder.stonecutting(Ingredient.of(source.get()), result.get())
-                .unlockedBy("has_" + safeName(source.get()), has(source.get()))
-                .save(consumer, safeId(result.get()) + "_from_" + safeName(source.get()) + "_stonecutting");
-        }
-    }
-    
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void slab(Supplier<? extends T> source, Supplier<? extends T> result, @Nullable String group, boolean stone, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get(), 6)
-            .pattern("XXX")
-            .define('X', source.get())
-            .group(group)
-            .unlockedBy("has_" + safeName(source.get()), has(source.get()))
-            .save(consumer);
-        if (stone) {
-            SingleItemRecipeBuilder.stonecutting(Ingredient.of(source.get()), result.get(), 2)
-                .unlockedBy("has_" + safeName(source.get()), has(source.get()))
-                .save(consumer, safeId(result.get()) + "_from_" + safeName(source.get()) + "_stonecutting");
+	private <T extends ItemLike> void singleItem(Supplier<? extends T> source, Supplier<? extends T> result, int required, int amount, Consumer<FinishedRecipe> consumer) {
+		singleItemUnfinished(source, result, required, amount).save(consumer);
+	}
+
+	private <T extends ItemLike> void planks(Supplier<? extends T> source, Supplier<? extends T> result, Consumer<FinishedRecipe> consumer) {
+		singleItemUnfinished(source, result, 1, 4)
+				.group("planks")
+				.save(consumer);
+	}
+
+	private <T extends ItemLike> void bark(Supplier<? extends T> source, Supplier<? extends T> result, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get(), 3)
+				.pattern("##").pattern("##")
+				.define('#', source.get())
+				.group("bark")
+				.unlockedBy("has_log", has(Blocks.ACACIA_LOG))
+				.save(consumer);
+	}
+
+	private <T extends ItemLike> void stairs(Supplier<? extends T> source, Supplier<? extends T> result, @Nullable String group, boolean stone, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get(), 4)
+				.pattern("X  ").pattern("XX ").pattern("XXX")
+				.define('X', source.get())
+				.group(group)
+				.unlockedBy("has_" + safeName(source.get().asItem()), has(source.get()))
+				.save(consumer);
+		if (stone) {
+			SingleItemRecipeBuilder.stonecutting(Ingredient.of(source.get()), result.get())
+					.unlockedBy("has_" + safeName(source.get().asItem()), has(source.get()))
+					.save(consumer, safeId(result.get().asItem()) + "_from_" + safeName(source.get().asItem()) + "_stonecutting");
         }
     }
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void boardwalk(Supplier<? extends T> slab, Supplier<? extends T> result, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get(), 3)
-                .pattern("XXX")
-                .pattern("S S")
-                .define('X', slab.get())
-                .define('S', Tags.Items.RODS_WOODEN)
-                .group("tropicraft:boardwalk")
-                .unlockedBy("has_" + safeName(slab.get()), has(slab.get()))
-                .save(consumer);
-    }
-    
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void fence(Supplier<? extends T> source, Supplier<? extends T> result, @Nullable String group, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get(), 3)
-            .pattern("W#W").pattern("W#W")
-            .define('W', source.get())
-            .define('#', Tags.Items.RODS_WOODEN)
-            .group(group)
-            .unlockedBy("has_" + safeName(source.get()), has(source.get()))
-            .save(consumer);
-    }
-    
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void fenceGate(Supplier<? extends T> source, Supplier<? extends T> result, @Nullable String group, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get())
-            .pattern("#W#").pattern("#W#")
-            .define('W', source.get())
-            .define('#', Tags.Items.RODS_WOODEN)
-            .group(group)
-            .unlockedBy("has_" + safeName(source.get()), has(source.get()))
-            .save(consumer);
-    }
-    
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void wall(Supplier<? extends T> source, Supplier<? extends T> result, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get(), 6)
-            .pattern("XXX").pattern("XXX")
-            .define('X', source.get())
-            .unlockedBy("has_" + safeName(source.get()), has(source.get()))
-            .save(consumer);
-        SingleItemRecipeBuilder.stonecutting(Ingredient.of(source.get()), result.get())
-            .unlockedBy("has_" + safeName(source.get()), has(source.get()))
-            .save(consumer, safeId(result.get()) + "_from_" + safeName(source.get()) + "_stonecutting");
-    }
-    
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void door(Supplier<? extends T> source, Supplier<? extends T> result, @Nullable String group, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get(), 3)
-            .pattern("XX").pattern("XX").pattern("XX")
-            .define('X', source.get())
-            .group(group)
-            .unlockedBy("has_" + safeName(source.get()), has(source.get()))
-            .save(consumer);
+	private <T extends ItemLike> void slab(Supplier<? extends T> source, Supplier<? extends T> result, @Nullable String group, boolean stone, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get(), 6)
+				.pattern("XXX")
+				.define('X', source.get())
+				.group(group)
+				.unlockedBy("has_" + safeName(source.get().asItem()), has(source.get()))
+				.save(consumer);
+		if (stone) {
+			SingleItemRecipeBuilder.stonecutting(Ingredient.of(source.get()), result.get(), 2)
+					.unlockedBy("has_" + safeName(source.get().asItem()), has(source.get()))
+					.save(consumer, safeId(result.get().asItem()) + "_from_" + safeName(source.get().asItem()) + "_stonecutting");
+        }
     }
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void trapDoor(Supplier<? extends T> source, Supplier<? extends T> result, @Nullable String group, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get(), 2)
-            .pattern("XXX").pattern("XXX")
-            .define('X', source.get())
-            .group(group)
-            .unlockedBy("has_" + safeName(source.get()), has(source.get()))
-            .save(consumer);
-    }
-    
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void bongo(Supplier<? extends T> top, Supplier<? extends T> bottom, int size, Supplier<? extends T> result, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get())
-            .pattern(StringUtils.repeat('T', size))
-            .pattern(StringUtils.repeat('B', size))
-            .pattern(StringUtils.repeat('B', size))
-            .define('T', top.get())
-            .define('B', bottom.get())
-            .group("tropicraft:bongos")
-            .unlockedBy("has_" + safeName(top.get()), has(top.get()))
-            .save(consumer);
+	private <T extends ItemLike> void boardwalk(Supplier<? extends T> slab, Supplier<? extends T> result, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get(), 3)
+				.pattern("XXX")
+				.pattern("S S")
+				.define('X', slab.get())
+				.define('S', Tags.Items.RODS_WOODEN)
+				.group("tropicraft:boardwalk")
+				.unlockedBy("has_" + safeName(slab.get().asItem()), has(slab.get()))
+				.save(consumer);
+	}
+
+	private <T extends ItemLike> void fence(Supplier<? extends T> source, Supplier<? extends T> result, @Nullable String group, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get(), 3)
+				.pattern("W#W").pattern("W#W")
+				.define('W', source.get())
+				.define('#', Tags.Items.RODS_WOODEN)
+				.group(group)
+				.unlockedBy("has_" + safeName(source.get().asItem()), has(source.get()))
+				.save(consumer);
+	}
+
+	private <T extends ItemLike> void fenceGate(Supplier<? extends T> source, Supplier<? extends T> result, @Nullable String group, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get())
+				.pattern("#W#").pattern("#W#")
+				.define('W', source.get())
+				.define('#', Tags.Items.RODS_WOODEN)
+				.group(group)
+				.unlockedBy("has_" + safeName(source.get().asItem()), has(source.get()))
+				.save(consumer);
+	}
+
+	private <T extends ItemLike> void wall(Supplier<? extends T> source, Supplier<? extends T> result, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get(), 6)
+				.pattern("XXX").pattern("XXX")
+				.define('X', source.get())
+				.unlockedBy("has_" + safeName(source.get().asItem()), has(source.get()))
+				.save(consumer);
+		SingleItemRecipeBuilder.stonecutting(Ingredient.of(source.get()), result.get())
+				.unlockedBy("has_" + safeName(source.get().asItem()), has(source.get()))
+				.save(consumer, safeId(result.get().asItem()) + "_from_" + safeName(source.get().asItem()) + "_stonecutting");
+	}
+
+	private <T extends ItemLike> void door(Supplier<? extends T> source, Supplier<? extends T> result, @Nullable String group, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get(), 3)
+				.pattern("XX").pattern("XX").pattern("XX")
+				.define('X', source.get())
+				.group(group)
+				.unlockedBy("has_" + safeName(source.get().asItem()), has(source.get()))
+				.save(consumer);
+	}
+
+	private <T extends ItemLike> void trapDoor(Supplier<? extends T> source, Supplier<? extends T> result, @Nullable String group, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get(), 2)
+				.pattern("XXX").pattern("XXX")
+				.define('X', source.get())
+				.group(group)
+				.unlockedBy("has_" + safeName(source.get().asItem()), has(source.get()))
+				.save(consumer);
+	}
+
+	private <T extends ItemLike> void bongo(Supplier<? extends T> top, Supplier<? extends T> bottom, int size, Supplier<? extends T> result, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get())
+				.pattern(StringUtils.repeat('T', size))
+				.pattern(StringUtils.repeat('B', size))
+				.pattern(StringUtils.repeat('B', size))
+				.define('T', top.get())
+				.define('B', bottom.get())
+				.group("tropicraft:bongos")
+				.unlockedBy("has_" + safeName(top.get().asItem()), has(top.get()))
+				.save(consumer);
+	}
+
+	private <T extends ItemLike> void goggles(Supplier<? extends T> result, Supplier<? extends T> source, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get(), 1)
+				.pattern("YYY")
+				.pattern("X X")
+				.pattern(" Z ")
+				.define('X', Blocks.GLASS_PANE)
+				.define('Y', ZIRCON.get())
+				.define('Z', source.get())
+				.unlockedBy("has_" + safeName(source.get().asItem()), has(source.get()))
+				.unlockedBy("has_" + safeName(ZIRCON.get()), has(ZIRCON.get()))
+				.save(consumer);
     }
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void goggles(Supplier<? extends T> result, Supplier<? extends T> source, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get(), 1)
-            .pattern("YYY")
-            .pattern("X X")
-            .pattern(" Z ")
-            .define('X', Blocks.GLASS_PANE)
-            .define('Y', ZIRCON.get())
-            .define('Z', source.get())
-            .unlockedBy("has_" + safeName(source.get()), has(source.get()))
-            .unlockedBy("has_" + safeName(ZIRCON.get()), has(ZIRCON.get()))
-            .save(consumer);
-    }
+	private <T extends ItemLike> void flippers(Supplier<? extends T> result, Supplier<? extends T> source, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get(), 1)
+				.pattern("XX")
+				.pattern("YY")
+				.pattern("XX")
+				.define('X', source.get())
+				.define('Y', ZIRCON.get())
+				.unlockedBy("has_" + safeName(source.get().asItem()), has(source.get()))
+				.unlockedBy("has_" + safeName(ZIRCON.get()), has(ZIRCON.get()))
+				.save(consumer);
+	}
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void flippers(Supplier<? extends T> result, Supplier<? extends T> source, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get(), 1)
-            .pattern("XX")
-            .pattern("YY")
-            .pattern("XX")
-            .define('X', source.get())
-            .define('Y', ZIRCON.get())
-            .unlockedBy("has_" + safeName(source.get()), has(source.get()))
-            .unlockedBy("has_" + safeName(ZIRCON.get()), has(ZIRCON.get()))
-            .save(consumer);
-    }
+	private <T extends ItemLike> void ponyBottle(Supplier<? extends T> result, Supplier<? extends T> source, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get(), 1)
+				.pattern("Y")
+				.pattern("X")
+				.define('X', Blocks.PINK_STAINED_GLASS_PANE)
+				.define('Y', Blocks.LEVER)
+				.unlockedBy("has_" + safeName(Blocks.PINK_STAINED_GLASS_PANE), has(Blocks.PINK_STAINED_GLASS_PANE))
+				.save(consumer);
+	}
 
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void ponyBottle(Supplier<? extends T> result, Supplier<? extends T> source, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get(), 1)
-            .pattern("Y")
-            .pattern("X")
-            .define('X', Blocks.PINK_STAINED_GLASS_PANE)
-            .define('Y', Blocks.LEVER)
-            .unlockedBy("has_" + safeName(Blocks.PINK_STAINED_GLASS_PANE), has(Blocks.PINK_STAINED_GLASS_PANE))
-            .save(consumer);
-    }
-
-    private <T extends ItemLike & IForgeRegistryEntry<?>> void harness(Supplier<? extends T> result, Supplier<? extends T> source, Consumer<FinishedRecipe> consumer) {
-        ShapedRecipeBuilder.shaped(result.get(), 1)
-            .pattern("Y Y")
-            .pattern("YXY")
-            .pattern("YZY")
-            .define('X', source.get())
-            .define('Y', TropicraftTags.Items.LEATHER)
-            .define('Z', AZURITE.get())
-            .unlockedBy("has_" + safeName(AZURITE.get()), has(AZURITE.get()))
-            .save(consumer);
-    }
+	private <T extends ItemLike> void harness(Supplier<? extends T> result, Supplier<? extends T> source, Consumer<FinishedRecipe> consumer) {
+		ShapedRecipeBuilder.shaped(result.get(), 1)
+				.pattern("Y Y")
+				.pattern("YXY")
+				.pattern("YZY")
+				.define('X', source.get())
+				.define('Y', TropicraftTags.Items.LEATHER)
+				.define('Z', AZURITE.get())
+				.unlockedBy("has_" + safeName(AZURITE.get()), has(AZURITE.get()))
+				.save(consumer);
+	}
 }

@@ -16,7 +16,6 @@ import net.tropicraft.core.common.item.TropicraftItems;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Random;
 
 public class EntityAIGoneFishin extends Goal {
 
@@ -33,7 +32,6 @@ public class EntityAIGoneFishin extends Goal {
     private boolean debugTask = false;
 
     private EntityKoaBase entity;
-    private Random rand;
 
     private BlockPos posLastWaterFound;
     private BlockPos posLastLandFound;
@@ -61,7 +59,6 @@ public class EntityAIGoneFishin extends Goal {
     public EntityAIGoneFishin(EntityKoaBase entity) {
         this.entity = entity;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
-        rand = new Random();
 
         walkingTimeout = walkingTimeoutMax;
         fishingTimeout = fishingTimeoutMax;
@@ -156,7 +153,7 @@ public class EntityAIGoneFishin extends Goal {
                     stop();
                 }
             } else {
-                if (rand.nextInt(150) == 0 && entity.getNavigation().isDone()) {
+                if (entity.getRandom().nextInt(150) == 0 && entity.getNavigation().isDone()) {
                     //long distance wandering?
                     //ai.updateWanderPath();
                 }
@@ -258,11 +255,11 @@ public class EntityAIGoneFishin extends Goal {
                     retractLine();
                     fishCaught++;
                     //entity.inventory.addItem(new ItemStack(Items.FISH));
-                    entity.inventory.addItem(listFishables.get(rand.nextInt(listFishables.size())));
+                    entity.inventory.addItem(listFishables.get(entity.getRandom().nextInt(listFishables.size())));
 
                     debug("caught a fish");
 
-                    if (getFishCount() > 4 || (rand.nextInt(1) == 0 && getFishCount() >= 2)) {
+                    if (getFishCount() > 4 || (entity.getRandom().nextInt(1) == 0 && getFishCount() >= 2)) {
                         if (Util.tryMoveToXYZLongDist(entity, homePosition, moveSpeedAmp)) {
                             setState(FISHING_STATE.RETURN_TO_BASE);
                         } else {
@@ -270,7 +267,7 @@ public class EntityAIGoneFishin extends Goal {
                             return;
                         }
                     } else {
-                        if (rand.nextInt(2) == 0) {
+                        if (entity.getRandom().nextInt(2) == 0) {
                             setState(FISHING_STATE.IDLE);
                         } else {
                             //cast line

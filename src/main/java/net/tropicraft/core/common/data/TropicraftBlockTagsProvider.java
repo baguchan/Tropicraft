@@ -16,7 +16,21 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static net.tropicraft.core.common.block.TropicraftBlocks.*;
-import static net.tropicraft.core.common.block.TropicraftFlower.*;
+import static net.tropicraft.core.common.block.TropicraftFlower.ACAI_VINE;
+import static net.tropicraft.core.common.block.TropicraftFlower.ANEMONE;
+import static net.tropicraft.core.common.block.TropicraftFlower.BROMELIAD;
+import static net.tropicraft.core.common.block.TropicraftFlower.CANNA;
+import static net.tropicraft.core.common.block.TropicraftFlower.COMMELINA_DIFFUSA;
+import static net.tropicraft.core.common.block.TropicraftFlower.CROCOSMIA;
+import static net.tropicraft.core.common.block.TropicraftFlower.CROTON;
+import static net.tropicraft.core.common.block.TropicraftFlower.DRACAENA;
+import static net.tropicraft.core.common.block.TropicraftFlower.FOLIAGE;
+import static net.tropicraft.core.common.block.TropicraftFlower.MAGIC_MUSHROOM;
+import static net.tropicraft.core.common.block.TropicraftFlower.ORANGE_ANTHURIUM;
+import static net.tropicraft.core.common.block.TropicraftFlower.ORCHID;
+import static net.tropicraft.core.common.block.TropicraftFlower.PATHOS;
+import static net.tropicraft.core.common.block.TropicraftFlower.RED_ANTHURIUM;
+import static net.tropicraft.core.common.block.TropicraftFlower.TROPICAL_FERN;
 
 public class TropicraftBlockTagsProvider extends BlockTagsProvider {
 
@@ -28,7 +42,6 @@ public class TropicraftBlockTagsProvider extends BlockTagsProvider {
     @Override
     protected void addTags() {
         // Filling vanilla tags
-        
         createAndAppend(TropicraftTags.Blocks.SAND, BlockTags.SAND,
                 PURIFIED_SAND, CORAL_SAND, FOAMY_SAND, MINERAL_SAND, VOLCANIC_SAND);
 
@@ -122,6 +135,8 @@ public class TropicraftBlockTagsProvider extends BlockTagsProvider {
                 AZURITE_BLOCK, ZIRCON_BLOCK, EUDIALYTE_BLOCK, SHAKA_BLOCK, MANGANESE_BLOCK);
 
         createTag(TropicraftTags.Blocks.BONGOS, SMALL_BONGO_DRUM, MEDIUM_BONGO_DRUM, LARGE_BONGO_DRUM);
+        createTag(TropicraftTags.Blocks.TROPICS_CARVER_REPLACEABLES,
+                CORAL_SAND, FOAMY_SAND, MINERAL_SAND, PACKED_PURIFIED_SAND, PURIFIED_SAND, VOLCANIC_SAND, MUD, MUD_WITH_PIANGUAS);
     }
     
     @SafeVarargs

@@ -13,8 +13,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -29,18 +29,18 @@ import javax.annotation.Nullable;
 
 @EventBusSubscriber(value = Dist.CLIENT, modid = Constants.MODID, bus = Bus.FORGE)
 public class ScubaHUD {
-    
+
     @SubscribeEvent
-    public static void renderHUD(RenderGameOverlayEvent event) {
+    public static void renderHUD(RenderGuiOverlayEvent.Post event) {
         Entity renderViewEntity = Minecraft.getInstance().cameraEntity;
-        if (event.getType() == ElementType.TEXT && renderViewEntity instanceof Player) {
+        if (event.getOverlay() == VanillaGuiOverlay.FOOD_LEVEL.type() && renderViewEntity instanceof Player) {
             Player player = (Player) renderViewEntity;
             // TODO support other slots than chest?
             ItemStack chestStack = player.getItemBySlot(EquipmentSlot.CHEST);
             Item chestItem = chestStack.getItem();
             if (chestItem instanceof ScubaArmorItem) {
                 LazyOptional<ScubaData> data = player.getCapability(ScubaData.CAPABILITY);
-                int airRemaining = ((ScubaArmorItem)chestItem).getRemainingAir(chestStack);
+                int airRemaining = ((ScubaArmorItem) chestItem).getRemainingAir(chestStack);
                 ChatFormatting airColor = getAirTimeColor(airRemaining, player.level);
                 double depth = ScubaData.getDepth(player);
                 String depthStr;
@@ -49,11 +49,11 @@ public class ScubaHUD {
                 } else {
                     depthStr = TropicraftLangKeys.NA.getLocalizedText();
                 }
-                data.ifPresent(d -> drawHUDStrings(event.getMatrixStack(),
-                    TropicraftLangKeys.SCUBA_AIR_TIME.format(airColor + formatTime(airRemaining)),
-                    TropicraftLangKeys.SCUBA_DIVE_TIME.format(formatTime(d.getDiveTime())),
-                    TropicraftLangKeys.SCUBA_DEPTH.format(depthStr),
-                    TropicraftLangKeys.SCUBA_MAX_DEPTH.format(String.format("%.1fm", d.getMaxDepth()))));
+                data.ifPresent(d -> drawHUDStrings(event.getPoseStack(),
+                        TropicraftLangKeys.SCUBA_AIR_TIME.format(airColor + formatTime(airRemaining)),
+                        TropicraftLangKeys.SCUBA_DIVE_TIME.format(formatTime(d.getDiveTime())),
+                        TropicraftLangKeys.SCUBA_DEPTH.format(depthStr),
+                        TropicraftLangKeys.SCUBA_MAX_DEPTH.format(String.format("%.1fm", d.getMaxDepth()))));
             }
         }
     }

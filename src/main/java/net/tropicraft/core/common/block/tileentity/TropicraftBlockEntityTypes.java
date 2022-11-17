@@ -10,7 +10,7 @@ import net.tropicraft.core.common.block.TropicraftBlocks;
 
 public class TropicraftBlockEntityTypes {
 
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITIES, Constants.MODID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Constants.MODID);
 
     public static final RegistryObject<BlockEntityType<BambooChestBlockEntity>> BAMBOO_CHEST = BLOCK_ENTITIES.register(
             "bamboo_chest", () -> new BlockEntityType<>(BambooChestBlockEntity::new, Sets.newHashSet(TropicraftBlocks.BAMBOO_CHEST.get()), null));
