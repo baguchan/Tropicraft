@@ -18,6 +18,7 @@ public class TropicraftBiomeTagsProvider extends BiomeTagsProvider {
         // Add forge tags for our ores
         tag(TropicraftTags.Biomes.HAS_HOME_TREE).add(TropicraftBiomes.RAINFOREST.get(), TropicraftBiomes.BAMBOO_RAINFOREST.get(), TropicraftBiomes.OSA_RAINFOREST.get());
         tag(TropicraftTags.Biomes.HAS_KOA_VILLAGE).add(TropicraftBiomes.BEACH.get());
+		tag(TropicraftTags.Biomes.HAS_VOLCANO).add(TropicraftBiomes.OCEAN.get(), TropicraftBiomes.BEACH.get(), TropicraftBiomes.RAINFOREST.get(), TropicraftBiomes.BAMBOO_RAINFOREST.get(), TropicraftBiomes.OSA_RAINFOREST.get());
     }
 
 

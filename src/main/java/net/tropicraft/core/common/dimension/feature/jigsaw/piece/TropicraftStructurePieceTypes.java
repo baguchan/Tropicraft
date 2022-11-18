@@ -11,4 +11,5 @@ public final class TropicraftStructurePieceTypes {
     public static final DeferredRegister<StructurePieceType> REGISTER = DeferredRegister.create(Registry.STRUCTURE_PIECE_REGISTRY, Constants.MODID);
 
     public static final RegistryObject<StructurePieceType> HOME_TREE = REGISTER.register("home_tree", () -> HomeTreeStructure.Piece::new);
+
 }

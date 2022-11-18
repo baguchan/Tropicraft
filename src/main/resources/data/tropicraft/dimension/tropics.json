@@ -6,6 +6,6 @@
       "type": "minecraft:multi_noise"
     },
     "settings": "tropicraft:tropics",
-    "type": "minecraft:noise"
+    "type": "tropicraft:tropics"
   }
 }

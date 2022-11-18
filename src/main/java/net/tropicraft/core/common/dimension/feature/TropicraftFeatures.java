@@ -88,7 +88,8 @@ public class TropicraftFeatures {
     })), GenerationStep.Decoration.SURFACE_STRUCTURES, TerrainAdjustment.BEARD_THIN), holderOf(TropicraftTemplatePools.KOA_TOWN_CENTERS), Optional.empty(), 7, ConstantHeight.of(VerticalAnchor.absolute(0)), false, Optional.of(Heightmap.Types.WORLD_SURFACE_WG), 116));
 
     public static final Holder<Structure> HOME_TREE = register(TropicraftBuildinStructures.HOME_TREE, new HomeTreeStructure(structure(TropicraftTags.Biomes.HAS_HOME_TREE, TerrainAdjustment.NONE)));
-    public static final RegistryObject<CoffeePlantFeature> COFFEE_BUSH = register("coffee_bush", () -> new CoffeePlantFeature(NoneFeatureConfiguration.CODEC));
+
+	public static final RegistryObject<CoffeePlantFeature> COFFEE_BUSH = register("coffee_bush", () -> new CoffeePlantFeature(NoneFeatureConfiguration.CODEC));
 
     public static final RegistryObject<ReedsFeature> REEDS = register("reeds", () -> new ReedsFeature(NoneFeatureConfiguration.CODEC));
     public static final RegistryObject<HugePlantFeature> HUGE_PLANT = register("huge_plant", () -> new HugePlantFeature(SimpleBlockConfiguration.CODEC));

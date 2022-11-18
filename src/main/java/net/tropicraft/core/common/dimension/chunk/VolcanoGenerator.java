@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -12,8 +13,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.tropicraft.Constants;
 import net.tropicraft.core.common.block.TropicraftBlocks;
 import net.tropicraft.core.common.block.VolcanicSandBlock;
@@ -61,11 +64,13 @@ public class VolcanoGenerator {
 
     private final BiomeSource biomeSource;
     private final ChunkGenerator chunkGenerator;
+    private final RandomState randomState;
 
-    public VolcanoGenerator(long worldSeed, BiomeSource biomeSource, ChunkGenerator chunkGenerator) {
+    public VolcanoGenerator(long worldSeed, BiomeSource biomeSource, ChunkGenerator chunkGenerator, RandomState randomState) {
         this.worldSeed = worldSeed;
         this.biomeSource = biomeSource;
         this.chunkGenerator = chunkGenerator;
+        this.randomState = randomState;
     }
 
     private static float dist(int pX1, int pZ1, int pX2, int pZ2) {
@@ -80,7 +85,6 @@ public class VolcanoGenerator {
         if (volcanoCoords == null) {
             return chunk;
         }
-
         int HEIGHT_OFFSET = VolcanoGenerator.getHeightOffsetForBiome(volcanoCoords.getY());
         int calderaCutoff = CALDERA_CUTOFF + HEIGHT_OFFSET;
         int lavaLevel = LAVA_LEVEL + HEIGHT_OFFSET;
@@ -118,12 +122,12 @@ public class VolcanoGenerator {
                 double volcanoHeight = getVolcanoHeight(relativeX, relativeZ, radiusX, radiusZ, volcNoise);
                 float distanceSquared = getDistanceSq(relativeX, relativeZ, radiusX, radiusZ);
 
-                int groundHeight = chunk.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
+                int groundHeight = chunk.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x + volcanoCoords.getX(), z + volcanoCoords.getZ());
                 groundHeight = Math.min(groundHeight, lavaLevel - 3);
 
                 if (distanceSquared < 1) {
                     for (int y = CHUNK_SIZE_Y; y > 0; y--) {
-                        pos.set(x, y, z);
+                        pos.set(x + chunkX, y, z + chunkZ);
 
                         if (volcanoHeight + groundHeight < calderaCutoff) {
                             if (volcanoHeight + groundHeight <= volcanoTop) {
@@ -273,12 +277,12 @@ public class VolcanoGenerator {
         randZ += rand.nextInt(numChunks - offsetChunks);
 
         if (oldi == randX && oldj == randZ) {
-            /*if (hasAllBiomes(biomeSource, oldi * 16 + 8, 0, oldj * 16 + 8, volcanoSpawnBiomesLand)) {
+            if (hasAllBiomes(biomeSource, oldi * 16 + 8, 0, oldj * 16 + 8, volcanoSpawnBiomesLand)) {
                 return SURFACE_BIOME;
             }
             if (hasAllBiomes(biomeSource, oldi * 16 + 8, 0, oldj * 16 + 8, volcanoSpawnBiomesOcean)) {
                 return OCEAN_BIOME;
-            }*/
+            }
 
             return SURFACE_BIOME;
         }
@@ -328,4 +332,8 @@ public class VolcanoGenerator {
         return biome == SURFACE_BIOME ? 0 : OCEAN_HEIGHT_OFFSET;
     }
 
+    private boolean hasAllBiomes(BiomeSource biomeSource, int centerX, int centerY, int centerZ, Set<ResourceLocation> allowedBiomes) {
+        Biome biome = biomeSource.getNoiseBiome(centerX >> 2, centerY >> 2, centerZ >> 2, this.randomState.sampler()).value();
+        return allowedBiomes.contains(ForgeRegistries.BIOMES.getKey(biome));
+    }
 }

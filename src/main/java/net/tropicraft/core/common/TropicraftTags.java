@@ -11,6 +11,7 @@ import net.tropicraft.Constants;
 public class TropicraftTags {
 	public static class Biomes extends TropicraftTags {
 		public static final TagKey<Biome> HAS_HOME_TREE = modTag("has_structure/home_tree");
+		public static final TagKey<Biome> HAS_VOLCANO = modTag("has_structure/volcano");
 		public static final TagKey<Biome> HAS_KOA_VILLAGE = modTag("has_structure/koa_village");
 
 		static TagKey<Biome> tag(String modid, String name) {

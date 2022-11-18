@@ -17,12 +17,14 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.IExtensionPoint;
 import net.minecraftforge.fml.ModList;
@@ -32,7 +34,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.registries.RegistryObject;
 import net.tropicraft.core.client.BasicColorHandler;
 import net.tropicraft.core.client.ClientSetup;
@@ -43,23 +44,45 @@ import net.tropicraft.core.common.block.TropicraftBlocks;
 import net.tropicraft.core.common.block.tileentity.TropicraftBlockEntityTypes;
 import net.tropicraft.core.common.command.TropicraftCommands;
 import net.tropicraft.core.common.command.debug.MapBiomesCommand;
-import net.tropicraft.core.common.data.*;
+import net.tropicraft.core.common.data.TropicraftBiomeTagsProvider;
+import net.tropicraft.core.common.data.TropicraftBlockTagsProvider;
+import net.tropicraft.core.common.data.TropicraftEntityTypeTagsProvider;
+import net.tropicraft.core.common.data.TropicraftItemTagsProvider;
+import net.tropicraft.core.common.data.TropicraftLootTableProvider;
+import net.tropicraft.core.common.data.TropicraftRecipeProvider;
 import net.tropicraft.core.common.data.loot.TropicraftLootConditions;
 import net.tropicraft.core.common.dimension.TropicraftDimension;
-import net.tropicraft.core.common.dimension.biome.TropicraftBiomeSource;
 import net.tropicraft.core.common.dimension.biome.TropicraftBiomes;
 import net.tropicraft.core.common.dimension.carver.TropicraftCarvers;
 import net.tropicraft.core.common.dimension.carver.TropicraftConfiguredCarvers;
-import net.tropicraft.core.common.dimension.chunk.TropicraftChunkGenerator;
-import net.tropicraft.core.common.dimension.feature.*;
+import net.tropicraft.core.common.dimension.feature.TropicraftFeatures;
+import net.tropicraft.core.common.dimension.feature.TropicraftMiscFeatures;
+import net.tropicraft.core.common.dimension.feature.TropicraftMiscPlacements;
+import net.tropicraft.core.common.dimension.feature.TropicraftStructureSets;
+import net.tropicraft.core.common.dimension.feature.TropicraftStructureType;
+import net.tropicraft.core.common.dimension.feature.TropicraftTreeFeatures;
+import net.tropicraft.core.common.dimension.feature.TropicraftTreePlacements;
+import net.tropicraft.core.common.dimension.feature.TropicraftVegetationFeatures;
+import net.tropicraft.core.common.dimension.feature.TropicraftVegetationPlacements;
 import net.tropicraft.core.common.dimension.feature.block_state_provider.TropicraftBlockStateProviders;
-import net.tropicraft.core.common.dimension.feature.jigsaw.*;
-import net.tropicraft.core.common.dimension.feature.jigsaw.piece.*;
+import net.tropicraft.core.common.dimension.feature.jigsaw.AdjustBuildingHeightProcessor;
+import net.tropicraft.core.common.dimension.feature.jigsaw.AirToCaveAirProcessor;
+import net.tropicraft.core.common.dimension.feature.jigsaw.SinkInGroundProcessor;
+import net.tropicraft.core.common.dimension.feature.jigsaw.SmoothingGravityProcessor;
+import net.tropicraft.core.common.dimension.feature.jigsaw.SteepPathProcessor;
+import net.tropicraft.core.common.dimension.feature.jigsaw.StructureSupportsProcessor;
+import net.tropicraft.core.common.dimension.feature.jigsaw.StructureVoidProcessor;
+import net.tropicraft.core.common.dimension.feature.jigsaw.TropicraftProcessorLists;
+import net.tropicraft.core.common.dimension.feature.jigsaw.TropicraftProcessorTypes;
+import net.tropicraft.core.common.dimension.feature.jigsaw.piece.HomeTreeBranchPiece;
+import net.tropicraft.core.common.dimension.feature.jigsaw.piece.NoRotateSingleJigsawPiece;
+import net.tropicraft.core.common.dimension.feature.jigsaw.piece.SingleNoAirJigsawPiece;
+import net.tropicraft.core.common.dimension.feature.jigsaw.piece.TropicraftStructurePieceTypes;
+import net.tropicraft.core.common.dimension.feature.jigsaw.piece.TropicraftStructurePoolElementTypes;
 import net.tropicraft.core.common.dimension.feature.pools.TropicraftTemplatePools;
 import net.tropicraft.core.common.dimension.feature.tree.TropicraftFoliagePlacers;
 import net.tropicraft.core.common.dimension.feature.tree.TropicraftTreeDecorators;
 import net.tropicraft.core.common.dimension.feature.tree.TropicraftTrunkPlacers;
-import net.tropicraft.core.common.dimension.noise.TropicraftNoiseGenSettings;
 import net.tropicraft.core.common.drinks.MixerRecipes;
 import net.tropicraft.core.common.entity.TropicraftEntities;
 import net.tropicraft.core.common.item.IColoredItem;
@@ -96,8 +119,6 @@ public class Tropicraft {
 
         MinecraftForge.EVENT_BUS.addListener(this::onServerStarting);
 
-        TropicraftDimension.addDefaultDimensionKey();
-
         // Registry objects
         TropicraftBlocks.BLOCKS.register(modBus);
         TropicraftBlocks.BLOCKITEMS.register(modBus);
@@ -111,11 +132,12 @@ public class Tropicraft {
         TropicraftTrunkPlacers.REGISTER.register(modBus);
         TropicraftTreeDecorators.REGISTER.register(modBus);
         TropicraftFeatures.FEATURES.register(modBus);
-        TropicraftFeatures.STRUCTURES.register(modBus);
         TropicraftBlockStateProviders.BLOCK_STATE_PROVIDERS.register(modBus);
         TropicraftStructurePieceTypes.REGISTER.register(modBus);
         TropicraftStructurePoolElementTypes.REGISTER.register(modBus);
         TropicraftProcessorTypes.REGISTER.register(modBus);
+        TropicraftDimension.DIMENSION_TYPES.register(modBus);
+        TropicraftDimension.NOISE_GENERATORS.register(modBus);
 
         TropicraftMiscFeatures.REGISTER.registerTo(modBus);
         TropicraftMiscPlacements.REGISTER.registerTo(modBus);
@@ -126,10 +148,9 @@ public class Tropicraft {
         TropicraftProcessorLists.REGISTER.register(modBus);
         TropicraftConfiguredCarvers.REGISTER.register(modBus);
         TropicraftTemplatePools.REGISTER.register(modBus);
-        TropicraftConfiguredStructures.REGISTER.register(modBus);
         TropicraftBiomes.REGISTER.register(modBus);
         TropicraftStructureSets.REGISTER.register(modBus);
-        TropicraftNoiseGenSettings.REGISTER.register(modBus);
+        TropicraftStructureType.DEFERRED_REGISTRY_STRUCTURE.register(modBus);
 
         // Hack in our item frame models the way vanilla does
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
@@ -164,12 +185,12 @@ public class Tropicraft {
     }
 
     @OnlyIn(Dist.CLIENT)
-    private void registerItemColors(ColorHandlerEvent.Item evt) {
+    private void registerItemColors(RegisterColorHandlersEvent.Item evt) {
         BasicColorHandler basic = new BasicColorHandler();
         for (RegistryObject<Item> ro : TropicraftItems.ITEMS.getEntries()) {
             Item item = ro.get();
             if (item instanceof IColoredItem) {
-                evt.getItemColors().register(basic, item);
+                evt.register(basic, item);
             }
         }
     }
@@ -177,9 +198,8 @@ public class Tropicraft {
     private void setup(final FMLCommonSetupEvent event) {
         TropicraftPackets.init();
         TropicraftEntities.registerSpawns();
-
-        TropicraftChunkGenerator.register();
-        TropicraftBiomeSource.register();
+        TropicraftFeatures.init();
+        TropicraftBiomes.init();
 
         Reflection.initialize(
                 SingleNoAirJigsawPiece.class, NoRotateSingleJigsawPiece.class, HomeTreeBranchPiece.class,
@@ -193,7 +213,8 @@ public class Tropicraft {
         );
     }
 
-    private void registerCaps(RegisterCapabilitiesEvent event) {
+    @SubscribeEvent
+    public static void registerCaps(RegisterCapabilitiesEvent event) {
         event.register(ScubaData.class);
     }
 
@@ -213,17 +234,18 @@ public class Tropicraft {
 
         if (event.includeClient()) {
             TropicraftBlockstateProvider blockstates = new TropicraftBlockstateProvider(gen, existingFileHelper);
-            gen.addProvider(blockstates);
-            gen.addProvider(new TropicraftItemModelProvider(gen, blockstates.getExistingHelper()));
-            gen.addProvider(new TropicraftLangProvider(gen));
+            gen.addProvider(event.includeClient(), blockstates);
+            gen.addProvider(event.includeClient(), new TropicraftItemModelProvider(gen, blockstates.getExistingHelper()));
+            gen.addProvider(event.includeClient(), new TropicraftLangProvider(gen));
         }
         if (event.includeServer()) {
             TropicraftBlockTagsProvider blockTags = new TropicraftBlockTagsProvider(gen, existingFileHelper);
-            gen.addProvider(blockTags);
-            gen.addProvider(new TropicraftItemTagsProvider(gen, blockTags, existingFileHelper));
-            gen.addProvider(new TropicraftRecipeProvider(gen));
-            gen.addProvider(new TropicraftLootTableProvider(gen));
-            gen.addProvider(new TropicraftEntityTypeTagsProvider(gen, existingFileHelper));
+            gen.addProvider(event.includeServer(), blockTags);
+            gen.addProvider(event.includeServer(), new TropicraftItemTagsProvider(gen, blockTags, existingFileHelper));
+            gen.addProvider(event.includeServer(), new TropicraftBiomeTagsProvider(gen, existingFileHelper));
+            gen.addProvider(event.includeServer(), new TropicraftRecipeProvider(gen));
+            gen.addProvider(event.includeServer(), new TropicraftLootTableProvider(gen));
+            gen.addProvider(event.includeServer(), new TropicraftEntityTypeTagsProvider(gen, existingFileHelper));
         }
     }
 }

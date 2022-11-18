@@ -51,7 +51,7 @@ public class TropicraftDimension {
     public static final RegistryObject<NoiseGeneratorSettings> TROPICS_NOISE_GEN = NOISE_GENERATORS.register("tropics", TropicraftDimension::tropics);
     public static final RegistryObject<DimensionType> TROPICS_DIM_TYPE = DIMENSION_TYPES.register("tropics", TropicraftDimension::tropicsDimensionType);
 
-    static final NoiseSettings TROPI_NOISE_SETTINGS = create(-80, 384, 1, 2);
+    static final NoiseSettings TROPI_NOISE_SETTINGS = create(-64, 384, 1, 2);
 
     public static NoiseGeneratorSettings tropics() {
         return new NoiseGeneratorSettings(TROPI_NOISE_SETTINGS, Blocks.STONE.defaultBlockState(), Blocks.WATER.defaultBlockState(), TropicraftNoiseGen.tropics(), TropicraftSurfaces.tropics(), (new TropicraftBiomeBuilder()).spawnTarget(), 64, false, true, false, false);
