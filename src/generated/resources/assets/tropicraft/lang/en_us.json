@@ -226,6 +226,7 @@
   "block.tropicraft.zircon_block": "Zircon Block",
   "block.tropicraft.zircon_ore": "Zircon Ore",
   "block.tropicraft.zirconium_block": "Zirconium Block",
+  "commands.locate.success": "The nearest  %1$s is at %2$s (%3$s blocks away)",
   "entity.tropicraft.ashen": "Ashen",
   "entity.tropicraft.ashen_mask": "Ashen Mask",
   "entity.tropicraft.bamboo_item_frame": "Bamboo Item Frame",

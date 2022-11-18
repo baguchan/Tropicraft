@@ -1,7 +1,17 @@
 package net.tropicraft.core.common.dimension.chunk;
 
 import com.google.common.collect.ImmutableSet;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -15,6 +25,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.tropicraft.Constants;
@@ -69,25 +81,73 @@ public class VolcanoGenerator {
     public VolcanoGenerator(long worldSeed, BiomeSource biomeSource, ChunkGenerator chunkGenerator, RandomState randomState) {
         this.worldSeed = worldSeed;
         this.biomeSource = biomeSource;
-        this.chunkGenerator = chunkGenerator;
-        this.randomState = randomState;
-    }
+		this.chunkGenerator = chunkGenerator;
+		this.randomState = randomState;
+	}
 
-    private static float dist(int pX1, int pZ1, int pX2, int pZ2) {
-        int i = pX2 - pX1;
-        int j = pZ2 - pZ1;
-        return Mth.sqrt((float)(i * i + j * j));
-    }
+	private static float dist(int pX1, int pZ1, int pX2, int pZ2) {
+		int i = pX2 - pX1;
+		int j = pZ2 - pZ1;
+		return Mth.sqrt((float) (i * i + j * j));
+	}
 
-    public ChunkAccess generate(int chunkX, int chunkZ, ChunkAccess chunk, WorldgenRandom random) {
-        BlockPos volcanoCoords = getVolcanoNear(this.biomeSource, this.worldSeed, chunkX, chunkZ, 0);
+	@SubscribeEvent
+	public static void onServerStarting(ServerStartingEvent event) {
+		for (ServerLevel serverLevel : event.getServer().getAllLevels()) {
+			ChunkGenerator generator = serverLevel.getLevel().getChunkSource().getGenerator();
+			if ((generator instanceof TropiChunkGenerator tropicsGenerator)) {
+				//if volcanoGenerator is null add generator
+				if (tropicsGenerator.volcanoGenerator == null) {
+					tropicsGenerator.volcanoGenerator = new VolcanoGenerator(serverLevel.getSeed(), tropicsGenerator.getBiomeSource(), tropicsGenerator, serverLevel.getChunkSource().randomState());
+				}
+			}
+		}
 
-        if (volcanoCoords == null) {
-            return chunk;
-        }
-        int HEIGHT_OFFSET = VolcanoGenerator.getHeightOffsetForBiome(volcanoCoords.getY());
-        int calderaCutoff = CALDERA_CUTOFF + HEIGHT_OFFSET;
-        int lavaLevel = LAVA_LEVEL + HEIGHT_OFFSET;
+		// we don't really have a structure but we fake it
+		CommandDispatcher<CommandSourceStack> dispatcher = event.getServer().getCommands().getDispatcher();
+
+		LiteralArgumentBuilder<CommandSourceStack> locate = Commands.literal("locate").requires(source -> source.hasPermission(2));
+		dispatcher.register(
+				locate.then(Commands.literal(Constants.MODID + ":volcano")
+						.executes(ctx -> {
+							CommandSourceStack source = ctx.getSource();
+							BlockPos pos = new BlockPos(source.getPosition());
+
+							ChunkGenerator generator = source.getLevel().getChunkSource().getGenerator();
+							if (!(generator instanceof TropiChunkGenerator tropicsGenerator)) {
+								throw new SimpleCommandExceptionType(Component.translatable("commands.locate.failed")).create();
+							}
+
+							VolcanoGenerator volcanoGen = tropicsGenerator.getVolcano();
+							if (volcanoGen != null) {
+								BlockPos volcanoPos = volcanoGen.getVolcanoNear(source.getLevel(), pos.getX() >> 4, pos.getZ() >> 4, 100);
+								if (volcanoPos == null) {
+									throw new SimpleCommandExceptionType(Component.translatable("commands.locate.failed")).create();
+								} else {
+									int i = Mth.floor(dist(volcanoPos.getX(), volcanoPos.getZ(), pos.getX(), pos.getZ()));
+									Component component = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", volcanoPos.getX(), "~", volcanoPos.getZ())).withStyle((p_207527_) -> {
+										return p_207527_.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + volcanoPos.getX() + " ~ " + volcanoPos.getZ())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")));
+									});
+									source.sendSuccess(Component.translatable("commands.locate.success", "Volcano", component, i), false);
+
+									return i;
+								}
+							} else {
+								throw new SimpleCommandExceptionType(Component.translatable("commands.locate.failed")).create();
+							}
+						}))
+		);
+	}
+
+	public ChunkAccess generate(int chunkX, int chunkZ, ChunkAccess chunk, WorldgenRandom random) {
+		BlockPos volcanoCoords = getVolcanoNear(this.biomeSource, this.worldSeed, chunkX, chunkZ, 0);
+
+		if (volcanoCoords == null) {
+			return chunk;
+		}
+		int HEIGHT_OFFSET = VolcanoGenerator.getHeightOffsetForBiome(volcanoCoords.getY());
+		int calderaCutoff = CALDERA_CUTOFF + HEIGHT_OFFSET;
+		int lavaLevel = LAVA_LEVEL + HEIGHT_OFFSET;
         int volcanoTop = VOLCANO_TOP + HEIGHT_OFFSET;
         int volcanoCrust = VOLCANO_CRUST + HEIGHT_OFFSET;
 
@@ -122,7 +182,7 @@ public class VolcanoGenerator {
                 double volcanoHeight = getVolcanoHeight(relativeX, relativeZ, radiusX, radiusZ, volcNoise);
                 float distanceSquared = getDistanceSq(relativeX, relativeZ, radiusX, radiusZ);
 
-                int groundHeight = chunk.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x + volcanoCoords.getX(), z + volcanoCoords.getZ());
+				int groundHeight = chunk.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
                 groundHeight = Math.min(groundHeight, lavaLevel - 3);
 
                 if (distanceSquared < 1) {

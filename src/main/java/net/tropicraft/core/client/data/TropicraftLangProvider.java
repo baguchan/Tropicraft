@@ -463,17 +463,20 @@ public class TropicraftLangProvider extends LanguageProvider {
 
         // MISC
 
-        add(Tropicraft.TROPICRAFT_ITEM_GROUP, "Tropicraft");
-        add("attribute.name." + ForgeRegistries.ATTRIBUTES.getKey(ForgeMod.SWIM_SPEED.get()).getPath(), "Swim Speed");
+		add(Tropicraft.TROPICRAFT_ITEM_GROUP, "Tropicraft");
+		add("attribute.name." + ForgeRegistries.ATTRIBUTES.getKey(ForgeMod.SWIM_SPEED.get()).getPath(), "Swim Speed");
 
-        // Koa
-        add("entity.tropicraft.koa.female.hunter.name", "Koa Hunter");
-        add("entity.tropicraft.koa.female.fisherman.name", "Koa Fisher");
-        add("entity.tropicraft.koa.male.hunter.name", "Koa Hunter");
-        add("entity.tropicraft.koa.male.fisherman.name", "Koa Fisher");
+		// Koa
+		add("entity.tropicraft.koa.female.hunter.name", "Koa Hunter");
+		add("entity.tropicraft.koa.female.fisherman.name", "Koa Fisher");
+		add("entity.tropicraft.koa.male.hunter.name", "Koa Hunter");
+		add("entity.tropicraft.koa.male.fisherman.name", "Koa Fisher");
 
-        TropicraftLangKeys.generate(this);
-    }
+		add("commands.locate.success", "The nearest  %1$s is at %2$s (%3$s blocks away)");
+
+		TropicraftLangKeys.generate(this);
+
+	}
 
     private String getAutomaticName(ResourceLocation resourceLocation) {
         return Util.toEnglishName(resourceLocation.getPath());
