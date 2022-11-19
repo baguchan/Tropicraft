@@ -39,10 +39,11 @@ public class TropiChunkGenerator extends NoiseBasedChunkGenerator {
 		this.noises = p_224207_;
 	}
 
+	/*
+	 * When VolcanoGenerator's server start up event is success. fill the volcano
+	 */
 	@Override
 	public CompletableFuture<ChunkAccess> fillFromNoise(Executor pExecutor, Blender pBlender, RandomState pRandom, StructureManager pStructureManager, ChunkAccess pChunk) {
-
-
 		return super.fillFromNoise(pExecutor, pBlender, pRandom, pStructureManager, pChunk).thenApply(volcanoChunk -> {
 			if (this.volcanoGenerator != null) {
 				ChunkPos chunkPos = volcanoChunk.getPos();

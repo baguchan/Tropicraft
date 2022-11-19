@@ -80,7 +80,7 @@ public class TropicraftFeatures {
 
     public static final Holder<Structure> KOA_VILLAGE = register(TropicraftBuildinStructures.KOA_VILLAGE, new JigsawStructure(structure(TropicraftTags.Biomes.HAS_KOA_VILLAGE, TerrainAdjustment.NONE), holderOf(TropicraftTemplatePools.KOA_TOWN_CENTERS), 6, ConstantHeight.of(VerticalAnchor.absolute(0)), true, Heightmap.Types.WORLD_SURFACE_WG));
 
-    public static final Holder<Structure> HOME_TREE = register(TropicraftBuildinStructures.HOME_TREE, new HomeTreeStructure(structure(TropicraftTags.Biomes.HAS_HOME_TREE, TerrainAdjustment.NONE)));
+    public static final Holder<Structure> HOME_TREE = register(TropicraftBuildinStructures.HOME_TREE, new JigsawStructure(structure(TropicraftTags.Biomes.HAS_HOME_TREE, TerrainAdjustment.NONE), holderOf(TropicraftTemplatePools.HOME_TREE_STARTS), 4, ConstantHeight.of(VerticalAnchor.absolute(0)), true, Heightmap.Types.WORLD_SURFACE_WG));
 
 	public static final RegistryObject<CoffeePlantFeature> COFFEE_BUSH = register("coffee_bush", () -> new CoffeePlantFeature(NoneFeatureConfiguration.CODEC));
 
