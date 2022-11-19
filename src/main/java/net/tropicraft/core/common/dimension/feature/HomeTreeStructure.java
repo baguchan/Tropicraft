@@ -32,9 +32,8 @@ public class HomeTreeStructure extends Structure {
     }
 
     private static void generatePieces(StructurePiecesBuilder p_227392_, BlockPos p_227531_, Rotation p_227532_, Structure.GenerationContext p_227393_) {
-        BlockPos blockpos = new BlockPos(p_227393_.chunkPos().getBlockX(9), 90, p_227393_.chunkPos().getBlockZ(9));
         StructurePoolElement structurepoolelement = TropicraftTemplatePools.HOME_TREE_STARTS.get().getRandomTemplate(p_227393_.random());
-        p_227392_.addPiece(new Piece(p_227393_.structureTemplateManager(), structurepoolelement, blockpos, 0, p_227532_, structurepoolelement.getBoundingBox(p_227393_.structureTemplateManager(), blockpos, p_227532_)));
+        p_227392_.addPiece(new Piece(p_227393_.structureTemplateManager(), structurepoolelement, p_227531_, 0, p_227532_, structurepoolelement.getBoundingBox(p_227393_.structureTemplateManager(), p_227531_, p_227532_)));
     }
 
     public Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext pContext) {

@@ -10,7 +10,6 @@ import net.minecraft.data.worldgen.features.OreFeatures;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -61,9 +60,7 @@ import net.tropicraft.core.common.dimension.feature.tree.UpTreeFeature;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class TropicraftFeatures {
 
@@ -81,11 +78,7 @@ public class TropicraftFeatures {
     public static final RegistryObject<RainforestVinesFeature> VINES = register("rainforest_vines", () -> new RainforestVinesFeature(RainforestVinesConfig.CODEC));
     public static final RegistryObject<UndergroundSeaPickleFeature> UNDERGROUND_SEA_PICKLE = register("underground_sea_pickle", () -> new UndergroundSeaPickleFeature(NoneFeatureConfiguration.CODEC));
 
-    public static final Holder<Structure> KOA_VILLAGE = register(TropicraftBuildinStructures.KOA_VILLAGE, new JigsawStructure(structure(TropicraftTags.Biomes.HAS_KOA_VILLAGE, Arrays.stream(MobCategory.values()).collect(Collectors.toMap((p_236555_) -> {
-        return p_236555_;
-    }, (p_236551_) -> {
-        return new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.STRUCTURE, WeightedRandomList.create());
-    })), GenerationStep.Decoration.SURFACE_STRUCTURES, TerrainAdjustment.BEARD_THIN), holderOf(TropicraftTemplatePools.KOA_TOWN_CENTERS), Optional.empty(), 7, ConstantHeight.of(VerticalAnchor.absolute(0)), false, Optional.of(Heightmap.Types.WORLD_SURFACE_WG), 116));
+    public static final Holder<Structure> KOA_VILLAGE = register(TropicraftBuildinStructures.KOA_VILLAGE, new JigsawStructure(structure(TropicraftTags.Biomes.HAS_KOA_VILLAGE, TerrainAdjustment.NONE), holderOf(TropicraftTemplatePools.KOA_TOWN_CENTERS), 6, ConstantHeight.of(VerticalAnchor.absolute(0)), true, Heightmap.Types.WORLD_SURFACE_WG));
 
     public static final Holder<Structure> HOME_TREE = register(TropicraftBuildinStructures.HOME_TREE, new HomeTreeStructure(structure(TropicraftTags.Biomes.HAS_HOME_TREE, TerrainAdjustment.NONE)));
 

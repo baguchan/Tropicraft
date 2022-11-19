@@ -149,10 +149,12 @@ public class EntityKoaBase extends Villager {
 
     private boolean finalizedSpawn;
 
+    private int updateMerchantTimer;
+    private boolean increaseProfessionLevelOnUpdate;
+
     public static Predicate<Entity> ENEMY_PREDICATE =
             //TODO: 1.14 fix
             input -> (input instanceof Monster/* && !(input instanceof CreeperEntity)) || input instanceof EntityTropiSkeleton || input instanceof EntityIguana || input instanceof EntityAshen*/);
-
 
 
     public enum Genders {
@@ -178,6 +180,11 @@ public class EntityKoaBase extends Villager {
         this.setPersistenceRequired();
 
         inventory = new SimpleContainer(9);
+    }
+
+    @Override
+    public void notifyTrade(MerchantOffer pOffer) {
+        super.notifyTrade(pOffer);
     }
 
     @Override
@@ -563,7 +570,18 @@ public class EntityKoaBase extends Villager {
         /*Util.removeGoal(this, EntityAIHarvestFarmland.class);
         Util.removeGoal(this, EntityAIPlay.class);*/
 
+        //Trade Update
+        if (!this.isTrading() && this.updateMerchantTimer > 0) {
+            --this.updateMerchantTimer;
+            if (this.updateMerchantTimer <= 0) {
+                if (this.increaseProfessionLevelOnUpdate) {
+                    this.increaseMerchantCareer();
+                    this.increaseProfessionLevelOnUpdate = false;
+                }
 
+                this.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 200, 0));
+            }
+        }
 
         //this.setDead();
         /*if (isChild()) {
@@ -578,6 +596,11 @@ public class EntityKoaBase extends Villager {
         findAndSetDrums(false);
         findAndSetTownID(false);
 
+    }
+
+    private void increaseMerchantCareer() {
+        this.setVillagerData(this.getVillagerData().setLevel(this.getVillagerData().getLevel() + 1));
+        this.updateTrades();
     }
 
     public static AttributeSupplier.Builder createAttributes() {

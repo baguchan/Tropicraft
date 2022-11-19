@@ -216,7 +216,9 @@ public final class HomeTreeBranchPiece extends StructurePoolElement implements P
 
     @Override
     public BoundingBox getGenerationBounds(StructureTemplateManager templates, BlockPos pos, Rotation rotation) {
-        //TODO
-        return this.getBoundingBox(templates, pos, rotation);
-    }
+		return new BoundingBox(
+				pos.getX() - MAX_RADIUS, pos.getY() - MAX_RADIUS, pos.getZ() - MAX_RADIUS,
+				pos.getX() + MAX_RADIUS, pos.getY() + MAX_RADIUS, pos.getZ() + MAX_RADIUS
+		);
+	}
 }
