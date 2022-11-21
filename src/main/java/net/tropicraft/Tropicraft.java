@@ -53,6 +53,7 @@ import net.tropicraft.core.common.data.TropicraftRecipeProvider;
 import net.tropicraft.core.common.data.loot.TropicraftLootConditions;
 import net.tropicraft.core.common.dimension.TropicraftDimension;
 import net.tropicraft.core.common.dimension.biome.TropicraftBiomes;
+import net.tropicraft.core.common.dimension.biome.modifier.TropiBiomeModifiers;
 import net.tropicraft.core.common.dimension.carver.TropicraftCarvers;
 import net.tropicraft.core.common.dimension.carver.TropicraftConfiguredCarvers;
 import net.tropicraft.core.common.dimension.feature.TropicraftFeatures;
@@ -141,25 +142,27 @@ public class Tropicraft {
 
         TropicraftMiscFeatures.REGISTER.registerTo(modBus);
         TropicraftMiscPlacements.REGISTER.registerTo(modBus);
-        TropicraftTreeFeatures.REGISTER.registerTo(modBus);
-        TropicraftTreePlacements.REGISTER.registerTo(modBus);
-        TropicraftVegetationFeatures.REGISTER.registerTo(modBus);
-        TropicraftVegetationPlacements.REGISTER.registerTo(modBus);
-        TropicraftProcessorLists.REGISTER.register(modBus);
-        TropicraftConfiguredCarvers.REGISTER.register(modBus);
-        TropicraftTemplatePools.REGISTER.register(modBus);
-        TropicraftBiomes.REGISTER.register(modBus);
-        TropicraftStructureSets.REGISTER.register(modBus);
-        TropicraftStructureType.DEFERRED_REGISTRY_STRUCTURE.register(modBus);
+		TropicraftTreeFeatures.REGISTER.registerTo(modBus);
+		TropicraftTreePlacements.REGISTER.registerTo(modBus);
+		TropicraftVegetationFeatures.REGISTER.registerTo(modBus);
+		TropicraftVegetationPlacements.REGISTER.registerTo(modBus);
+		TropicraftProcessorLists.REGISTER.register(modBus);
+		TropicraftConfiguredCarvers.REGISTER.register(modBus);
+		TropicraftTemplatePools.REGISTER.register(modBus);
+		TropicraftBiomes.REGISTER.register(modBus);
+		TropicraftStructureSets.REGISTER.register(modBus);
+		TropicraftStructureType.DEFERRED_REGISTRY_STRUCTURE.register(modBus);
+		TropiBiomeModifiers.BIOME_MODIFIER_SERIALIZERS.register(modBus);
 
-        // Hack in our item frame models the way vanilla does
-        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
-            StateDefinition<Block, BlockState> frameState = new StateDefinition.Builder<Block, BlockState>(Blocks.AIR).add(BooleanProperty.create("map")).create(Block::defaultBlockState, BlockState::new);
 
-            ModelBakery.STATIC_DEFINITIONS = ImmutableMap.<ResourceLocation, StateDefinition<Block, BlockState>>builder()
-                    .putAll(ModelBakery.STATIC_DEFINITIONS)
-                    .put(TropicraftItems.BAMBOO_ITEM_FRAME.getId(), frameState)
-                    .build();
+		// Hack in our item frame models the way vanilla does
+		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
+			StateDefinition<Block, BlockState> frameState = new StateDefinition.Builder<Block, BlockState>(Blocks.AIR).add(BooleanProperty.create("map")).create(Block::defaultBlockState, BlockState::new);
+
+			ModelBakery.STATIC_DEFINITIONS = ImmutableMap.<ResourceLocation, StateDefinition<Block, BlockState>>builder()
+					.putAll(ModelBakery.STATIC_DEFINITIONS)
+					.put(TropicraftItems.BAMBOO_ITEM_FRAME.getId(), frameState)
+					.build();
         });
     }
 
