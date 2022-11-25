@@ -14,8 +14,14 @@ public class TropiBiomeModifier implements BiomeModifier {
 
 	@Override
 	public void modify(Holder<Biome> biome, Phase phase, ModifiableBiomeInfo.BiomeInfo.Builder builder) {
-		if (phase == Phase.ADD && (biome.is(BiomeTags.IS_JUNGLE) && biome.is(BiomeTags.IS_OVERWORLD))) {
-			builder.getGenerationSettings().addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, TropicraftVegetationPlacements.PATCH_PINEAPPLE.getHolder().get());
+		if (phase == Phase.ADD) {
+			if (biome.is(BiomeTags.IS_JUNGLE) && biome.is(BiomeTags.IS_OVERWORLD)) {
+				builder.getGenerationSettings().addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, TropicraftVegetationPlacements.PATCH_PINEAPPLE.getHolder().get());
+			}
+
+			if (biome.is(BiomeTags.IS_BEACH) && biome.is(BiomeTags.IS_OVERWORLD)) {
+				builder.getGenerationSettings().addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, TropicraftVegetationPlacements.TREES_PALM.getHolder().get());
+			}
 		}
 	}
 
