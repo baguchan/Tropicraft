@@ -2,6 +2,7 @@ package net.tropicraft.core.common.entity.passive;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -274,9 +275,58 @@ public class EntityKoaBase extends Villager {
     }
 
     @Override
-    protected void registerGoals()
-    {
+    protected void registerGoals() {
         //TODO: old 1.12 style tasks go here
+    }
+
+    static class KoaTradeEnchanted implements VillagerTrades.ItemListing {
+        private final Item item;
+        private final int sellCount;
+        private final int maxUses;
+        private final int givenXP;
+        private final float priceMultiplier;
+
+        public KoaTradeEnchanted(ItemLike item, int sellCount, int maxUses, int givenXP) {
+            this.item = item.asItem();
+            this.sellCount = sellCount;
+            this.maxUses = maxUses;
+            this.givenXP = givenXP;
+            this.priceMultiplier = 0.05F;
+        }
+
+        @Override
+        public MerchantOffer getOffer(Entity entity, RandomSource random) {
+            ItemStack itemstack = new ItemStack(this.item, 1);
+            int enchantLevel = random.nextInt(10) + 5;
+            int cost = (int) (enchantLevel / 1.5F);
+
+            ItemStack itemstack2 = EnchantmentHelper.enchantItem(random, itemstack, enchantLevel, false);
+            return new MerchantOffer(new ItemStack(TropicraftItems.WHITE_PEARL.get(), this.sellCount + cost), itemstack2, this.maxUses, this.givenXP, this.priceMultiplier);
+        }
+    }
+
+    static class KoaTradeOnPearls implements VillagerTrades.ItemListing {
+        private final Item item;
+        private final int count;
+        private final int sellCount;
+        private final int maxUses;
+        private final int givenXP;
+        private final float priceMultiplier;
+
+        public KoaTradeOnPearls(ItemLike item, int count, int sellCount, int maxUses, int givenXP) {
+            this.item = item.asItem();
+            this.count = count;
+            this.sellCount = sellCount;
+            this.maxUses = maxUses;
+            this.givenXP = givenXP;
+            this.priceMultiplier = 0.05F;
+        }
+
+        @Override
+        public MerchantOffer getOffer(Entity entity, RandomSource random) {
+            ItemStack itemstack = new ItemStack(this.item, this.count);
+            return new MerchantOffer(new ItemStack(TropicraftItems.WHITE_PEARL.get(), this.sellCount), itemstack, this.maxUses, this.givenXP, this.priceMultiplier);
+        }
     }
 
     static class KoaTradeForPearls implements VillagerTrades.ItemListing {
@@ -301,15 +351,13 @@ public class EntityKoaBase extends Villager {
         }
     }
 
-    public Int2ObjectMap<VillagerTrades.ItemListing[]> getOfferMap() {
+    public List<Int2ObjectMap<VillagerTrades.ItemListing[]>> getOfferMap() {
 
         //TODO: 1.14 fix missing tropical and river fish entries from tropicrafts fix
         //- consider adding vanillas ones too now
-
-        Int2ObjectMap<VillagerTrades.ItemListing[]> offers = null;
-
+        List<Int2ObjectMap<VillagerTrades.ItemListing[]>> list = Lists.newArrayList();
         if (getRole() == Roles.FISHERMAN) {
-            offers = toIntMap(ImmutableMap.of(1,
+            list.add(toIntMap(ImmutableMap.of(1,
                     new VillagerTrades.ItemListing[]{
                             new KoaTradeForPearls(Items.TROPICAL_FISH, 20, 8, 2),
                             new KoaTradeForPearls(TropicraftItems.FISHING_NET.get(), 1, 8, 2),
@@ -318,17 +366,43 @@ public class EntityKoaBase extends Villager {
                             new KoaTradeForPearls(TropicraftItems.SARDINE_BUCKET.get(), 1, 4, 2),
                             new KoaTradeForPearls(TropicraftItems.PIRANHA_BUCKET.get(), 1, 3, 2),
                             new KoaTradeForPearls(TropicraftItems.TROPICAL_FERTILIZER.get(), 5, 8, 2)
-                    }));
+                    })));
+            list.add(toIntMap(ImmutableMap.of(2,
+                    new VillagerTrades.ItemListing[]{
+                            new KoaTradeOnPearls(TropicraftItems.COOKED_FISH.get(), 8, 1, 8, 10),
+                            new KoaTradeOnPearls(TropicraftItems.COOKED_RAY.get(), 6, 1, 8, 10)
+                    })));
+            list.add(toIntMap(ImmutableMap.of(3,
+                    new VillagerTrades.ItemListing[]{
+                            new KoaTradeForPearls(TropicraftItems.GRAPEFRUIT.get(), 12, 12, 15),
+                            new KoaTradeForPearls(TropicraftItems.LEMON.get(), 12, 12, 15),
+                            new KoaTradeForPearls(TropicraftItems.LIME.get(), 12, 12, 15)
+                    })));
         } else if (getRole() == Roles.HUNTER) {
-            offers = toIntMap(ImmutableMap.of(1,
+            list.add(toIntMap(ImmutableMap.of(1,
                     new VillagerTrades.ItemListing[]{
                             new KoaTradeForPearls(TropicraftItems.FROG_LEG.get(), 5, 8, 2),
                             new KoaTradeForPearls(TropicraftItems.IGUANA_LEATHER.get(), 2, 8, 2),
                             new KoaTradeForPearls(TropicraftItems.SCALE.get(), 5, 8, 2)
-                    }));
+                    })));
+            list.add(toIntMap(ImmutableMap.of(2,
+                    new VillagerTrades.ItemListing[]{
+                            new KoaTradeEnchanted(TropicraftItems.BAMBOO_SPEAR.get(), 1, 8, 10),
+                            new KoaTradeForPearls(TropicraftItems.BAMBOO_STICK.get(), 32, 12, 8)
+                    })));
+            list.add(toIntMap(ImmutableMap.of(3,
+                    new VillagerTrades.ItemListing[]{
+                            new KoaTradeEnchanted(TropicraftItems.SCALE_HELMET.get(), 4, 4, 15),
+                            new KoaTradeEnchanted(TropicraftItems.SCALE_CHESTPLATE.get(), 6, 4, 15)
+                    })));
+            list.add(toIntMap(ImmutableMap.of(4,
+                    new VillagerTrades.ItemListing[]{
+                            new KoaTradeEnchanted(TropicraftItems.SCALE_LEGGINGS.get(), 5, 4, 20),
+                            new KoaTradeEnchanted(TropicraftItems.SCALE_BOOTS.get(), 4, 4, 20)
+                    })));
         }
 
-        return offers;
+        return list;
 
         /*toIntMap(ImmutableMap.of(1,
                 new VillagerTrades.ITrade[]{
@@ -373,7 +447,7 @@ public class EntityKoaBase extends Villager {
     @Override
     protected void updateTrades() {
         VillagerData villagerdata = this.getVillagerData();
-        Int2ObjectMap<VillagerTrades.ItemListing[]> int2objectmap = getOfferMap();
+        Int2ObjectMap<VillagerTrades.ItemListing[]> int2objectmap = getOfferMap().get(villagerdata.getLevel() - 1);
         if (int2objectmap != null && !int2objectmap.isEmpty()) {
             VillagerTrades.ItemListing[] avillagertrades$itrade = int2objectmap.get(villagerdata.getLevel());
             if (avillagertrades$itrade != null) {
@@ -750,6 +824,29 @@ public class EntityKoaBase extends Villager {
             throw new RuntimeException(e);
         }
         return ret;
+    }
+
+    protected void rewardTradeXp(MerchantOffer pOffer) {
+        super.rewardTradeXp(pOffer);
+        if (this.shouldIncreaseLevel()) {
+            this.updateMerchantTimer = 40;
+            this.increaseProfessionLevelOnUpdate = true;
+        }
+
+        if (this.random.nextInt(3) == 0) {
+            this.restock();
+        }
+    }
+
+    public void restock() {
+        for (MerchantOffer merchantoffer : this.getOffers()) {
+            merchantoffer.resetUses();
+        }
+    }
+
+    private boolean shouldIncreaseLevel() {
+        int i = this.getVillagerData().getLevel();
+        return VillagerData.canLevelUp(i) && this.getVillagerXp() >= VillagerData.getMaxXpPerLevel(i);
     }
 
     @Override
