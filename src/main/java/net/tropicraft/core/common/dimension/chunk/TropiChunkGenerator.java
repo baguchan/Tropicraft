@@ -9,6 +9,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
@@ -53,6 +54,11 @@ public class TropiChunkGenerator extends NoiseBasedChunkGenerator {
 			}
 			return volcanoChunk;
 		});
+	}
+
+	@Override
+	protected Codec<? extends ChunkGenerator> codec() {
+		return CODEC;
 	}
 
 	public VolcanoGenerator getVolcano() {
