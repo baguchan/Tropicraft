@@ -6,7 +6,10 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Either;
 import com.tterrag.registrate.Registrate;
 import com.tterrag.registrate.builders.BlockBuilder;
-import com.tterrag.registrate.providers.*;
+import com.tterrag.registrate.providers.DataGenContext;
+import com.tterrag.registrate.providers.ProviderType;
+import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
+import com.tterrag.registrate.providers.RegistrateItemModelProvider;
 import com.tterrag.registrate.util.DataIngredient;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
 import com.tterrag.registrate.util.entry.BlockEntry;
@@ -99,7 +102,6 @@ import static net.minecraft.world.level.storage.loot.entries.LootItem.lootTableI
 import static net.minecraftforge.client.model.generators.ConfiguredModel.allRotations;
 import static net.minecraftforge.client.model.generators.ConfiguredModel.allYRotations;
 import static net.tropicraft.core.common.item.TropicraftItems.*;
-import static net.tropicraft.core.common.item.TropicraftItems.AZURITE;
 
 public class TropicraftBlocks {
     private static final Registrate REGISTRATE = Tropicraft.registrate();
