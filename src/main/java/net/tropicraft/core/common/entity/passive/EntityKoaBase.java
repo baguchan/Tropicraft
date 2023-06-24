@@ -12,7 +12,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -22,6 +21,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -258,7 +258,7 @@ public class EntityKoaBase extends Villager {
         }
 
         @Override
-        public MerchantOffer getOffer(Entity entity, Random random) {
+        public MerchantOffer getOffer(Entity entity, RandomSource random) {
             ItemStack itemstack = new ItemStack(this.item, this.count);
             return new MerchantOffer(itemstack, new ItemStack(TropicraftItems.WHITE_PEARL.get()), this.maxUses, this.givenXP, this.priceMultiplier);
         }
@@ -1546,7 +1546,7 @@ public class EntityKoaBase extends Villager {
 
     @Override
     public Component getDisplayName() {
-        return new TranslatableComponent("entity.tropicraft.koa." +
+        return Component.translatable("entity.tropicraft.koa." +
                 getGender().toString().toLowerCase(Locale.ROOT) + "." +
                 getRole().toString().toLowerCase(Locale.ROOT) + ".name"
         );
