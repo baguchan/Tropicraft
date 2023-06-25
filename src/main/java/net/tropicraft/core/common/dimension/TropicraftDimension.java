@@ -1,7 +1,10 @@
 package net.tropicraft.core.common.dimension;
 
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -19,8 +22,6 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.structure.StructureSet;
-import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraftforge.common.ForgeHooks;
@@ -48,10 +49,10 @@ public class TropicraftDimension {
 
     public static final ResourceLocation ID = new ResourceLocation(Constants.MODID, "tropics");
 
-    public static final ResourceKey<Level> WORLD = ResourceKey.create(Registry.DIMENSION_REGISTRY, ID);
-    public static final ResourceKey<LevelStem> DIMENSION = ResourceKey.create(Registry.LEVEL_STEM_REGISTRY, ID);
-    public static final ResourceKey<DimensionType> DIMENSION_TYPE = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, ID);
-    public static final ResourceKey<NoiseGeneratorSettings> DIMENSION_SETTINGS = ResourceKey.create(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY, ID);
+    public static final ResourceKey<Level> WORLD = ResourceKey.create(Registries.DIMENSION, ID);
+    public static final ResourceKey<LevelStem> DIMENSION = ResourceKey.create(Registries.LEVEL_STEM, ID);
+    public static final ResourceKey<DimensionType> DIMENSION_TYPE = ResourceKey.create(Registries.DIMENSION_TYPE, ID);
+    public static final ResourceKey<NoiseGeneratorSettings> DIMENSION_SETTINGS = ResourceKey.create(Registries.NOISE_SETTINGS, ID);
 
     public static final int SEA_LEVEL = 127;
 
@@ -91,26 +92,22 @@ public class TropicraftDimension {
 
     public static LevelStem createDimension(
             Registry<DimensionType> dimensionTypeRegistry,
-            Registry<StructureSet> structureSetRegistry,
-            Registry<Biome> biomeRegistry,
-            Registry<NoiseGeneratorSettings> dimensionSettingsRegistry,
-            Registry<NormalNoise.NoiseParameters> paramRegistry
+            HolderLookup.RegistryLookup<Biome> biomeRegistry,
+            Registry<NoiseGeneratorSettings> dimensionSettingsRegistry
     ) {
-        ChunkGenerator generator = TropicraftDimension.createGenerator(structureSetRegistry, paramRegistry, biomeRegistry, dimensionSettingsRegistry);
-
+        ChunkGenerator generator = TropicraftDimension.createGenerator(biomeRegistry, dimensionSettingsRegistry);
         return new LevelStem(dimensionTypeRegistry.getHolderOrThrow(TropicraftDimension.DIMENSION_TYPE), generator);
     }
 
-    public static ChunkGenerator createGenerator(Registry<StructureSet> structureSetRegistry, Registry<NormalNoise.NoiseParameters> params, Registry<Biome> biomeRegistry, Registry<NoiseGeneratorSettings> dimensionSettingsRegistry) {
+    public static ChunkGenerator createGenerator(HolderLookup.RegistryLookup<Biome> biomeRegistry, Registry<NoiseGeneratorSettings> dimensionSettingsRegistry) {
         Supplier<NoiseGeneratorSettings> dimensionSettings = () -> {
             // fallback to overworld so that we don't crash before our datapack is loaded (horrible workaround)
             NoiseGeneratorSettings settings = dimensionSettingsRegistry.get(DIMENSION_SETTINGS);
             return settings != null ? settings : dimensionSettingsRegistry.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
         };
         TropicraftBiomeSource biomeSource = new TropicraftBiomeSource(biomeRegistry);
-        return new NoiseBasedChunkGenerator(structureSetRegistry, params, biomeSource,
-                dimensionSettingsRegistry.getHolderOrThrow(dimensionSettingsRegistry.getResourceKey(dimensionSettings.get()).get())
-        );
+        Holder<NoiseGeneratorSettings> noiseGeneratorSettings = dimensionSettingsRegistry.getHolderOrThrow(dimensionSettingsRegistry.getResourceKey(dimensionSettings.get()).get());
+        return new NoiseBasedChunkGenerator(biomeSource, noiseGeneratorSettings);
     }
 
     /**
@@ -166,7 +163,7 @@ public class TropicraftDimension {
     @Nullable
     private static ServerLevel getTeleportDestination(ServerPlayer player, ResourceKey<Level> dimensionType) {
         ResourceKey<Level> destination;
-        if (player.level.dimension() == dimensionType) {
+        if (player.level().dimension() == dimensionType) {
             destination = Level.OVERWORLD;
         } else {
             destination = dimensionType;
@@ -181,16 +178,15 @@ public class TropicraftDimension {
     }
 
     // hack to get the correct sea level given a world: the vanilla IWorldReader.getSeaLevel() is deprecated and always returns 63 despite the chunk generator
-    public static int getSeaLevel(LevelReader world) {
-        if (world instanceof ServerLevel) {
-            ServerChunkCache chunkProvider = ((ServerLevel) world).getChunkSource();
+    public static int getSeaLevel(LevelReader reader) {
+        if (reader instanceof ServerLevel serverLevel) {
+            ServerChunkCache chunkProvider = serverLevel.getChunkSource();
             return chunkProvider.getGenerator().getSeaLevel();
-        } else if (world instanceof Level) {
-            ResourceKey<Level> dimensionKey = ((Level) world).dimension();
-            if (dimensionKey == WORLD) {
+        } else if (reader instanceof Level level) {
+            if (level.dimension() == WORLD) {
                 return SEA_LEVEL;
             }
         }
-        return world.getSeaLevel();
+        return reader.getSeaLevel();
     }
 }

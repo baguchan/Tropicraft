@@ -50,8 +50,8 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
@@ -80,7 +80,6 @@ import net.tropicraft.core.common.block.TikiTorchBlock.TorchSection;
 import net.tropicraft.core.common.block.huge_plant.HugePlantBlock;
 import net.tropicraft.core.common.block.jigarbov.JigarbovTorchType;
 import net.tropicraft.core.common.block.tileentity.*;
-import net.tropicraft.core.common.data.loot.MatchSwordCondition;
 import net.tropicraft.core.common.item.TropicraftItems;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -96,7 +95,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.tterrag.registrate.providers.RegistrateRecipeProvider.has;
-import static com.tterrag.registrate.providers.loot.RegistrateBlockLootTables.*;
+import static com.tterrag.registrate.providers.loot.RegistrateBlockLootTables.createSilkTouchDispatchTable;
 import static net.minecraft.world.level.storage.loot.LootPool.lootPool;
 import static net.minecraft.world.level.storage.loot.LootTable.lootTable;
 import static net.minecraft.world.level.storage.loot.entries.LootItem.lootTableItem;
@@ -129,7 +128,7 @@ public class TropicraftBlocks {
         });
 
         REGISTRATE.addDataGenerator(ProviderType.BLOCK_TAGS, prov -> {
-            prov.tag(TropicraftTags.Blocks.CARVER_REPLACEABLES).addTags(BlockTags.OVERWORLD_CARVER_REPLACEABLES);
+            prov.addTag(TropicraftTags.Blocks.CARVER_REPLACEABLES).addTags(BlockTags.OVERWORLD_CARVER_REPLACEABLES);
         });
     }
 
@@ -146,58 +145,58 @@ public class TropicraftBlocks {
             .register();
 
     public static final BlockEntry<Block> CHUNK = REGISTRATE.block("chunk", Block::new)
-            .initialProperties(Material.STONE, MaterialColor.COLOR_BLACK)
+            .initialProperties(Material.STONE, MapColor.COLOR_BLACK)
             .properties(p -> p.strength(6.0F).explosionResistance(30.0F))
             .blockstate(TropicraftBlocks::simpleBlockAllRotations)
             .lang("Chunk O' Head")
             .simpleItem()
             .register();
 
-    public static final BlockEntry<DropExperienceBlock> AZURITE_ORE = ore("azurite_ore", TropicraftItems.AZURITE, MaterialColor.STONE)
+    public static final BlockEntry<DropExperienceBlock> AZURITE_ORE = ore("azurite_ore", TropicraftItems.AZURITE, MapColor.STONE)
             .tag(BlockTags.NEEDS_IRON_TOOL)
             .item()
                 .tag(TropicraftTags.Items.AZURITE_ORE, Tags.Items.ORES)
                 .build()
             .register();
-    public static final BlockEntry<DropExperienceBlock> EUDIALYTE_ORE = ore("eudialyte_ore", TropicraftItems.EUDIALYTE, MaterialColor.STONE)
+    public static final BlockEntry<DropExperienceBlock> EUDIALYTE_ORE = ore("eudialyte_ore", TropicraftItems.EUDIALYTE, MapColor.STONE)
             .tag(BlockTags.NEEDS_IRON_TOOL)
             .item()
                 .tag(TropicraftTags.Items.EUDIALYTE_ORE, Tags.Items.ORES)
                 .build()
             .register();
-    public static final BlockEntry<DropExperienceBlock> MANGANESE_ORE = ore("manganese_ore", MaterialColor.STONE)
+    public static final BlockEntry<DropExperienceBlock> MANGANESE_ORE = ore("manganese_ore", MapColor.STONE)
             .tag(BlockTags.NEEDS_IRON_TOOL)
             .item()
                 .tag(TropicraftTags.Items.MANGANESE_ORE, Tags.Items.ORES)
                 .build()
             .register();
-    public static final BlockEntry<DropExperienceBlock> SHAKA_ORE = ore("shaka_ore", MaterialColor.COLOR_BLACK)
+    public static final BlockEntry<DropExperienceBlock> SHAKA_ORE = ore("shaka_ore", MapColor.COLOR_BLACK)
             .tag(BlockTags.NEEDS_IRON_TOOL)
             .item()
                 .tag(TropicraftTags.Items.SHAKA_ORE, Tags.Items.ORES)
                 .build()
             .register();
-    public static final BlockEntry<DropExperienceBlock> ZIRCON_ORE = ore("zircon_ore", TropicraftItems.ZIRCON, MaterialColor.STONE)
+    public static final BlockEntry<DropExperienceBlock> ZIRCON_ORE = ore("zircon_ore", TropicraftItems.ZIRCON, MapColor.STONE)
             .tag(BlockTags.NEEDS_IRON_TOOL)
             .item()
                 .tag(TropicraftTags.Items.ZIRCON_ORE, Tags.Items.ORES)
                 .build()
             .register();
 
-    private static BlockBuilder<DropExperienceBlock, Registrate> ore(String name, MaterialColor color) {
+    private static BlockBuilder<DropExperienceBlock, Registrate> ore(String name, MapColor color) {
         return REGISTRATE.block(name, DropExperienceBlock::new)
                 .initialProperties(() -> Blocks.STONE)
-                .properties(p -> p.strength(3.0F).color(color))
+                .properties(p -> p.strength(3.0F).mapColor(color))
                 .tag(BlockTags.MINEABLE_WITH_PICKAXE, Tags.Blocks.ORES)
                 .item()
                     .tag(Tags.Items.ORES)
                     .build();
     }
 
-    private static BlockBuilder<DropExperienceBlock, Registrate> ore(String name, Supplier<Item> gem, MaterialColor color) {
+    private static BlockBuilder<DropExperienceBlock, Registrate> ore(String name, Supplier<Item> gem, MapColor color) {
         return REGISTRATE.block(name, DropExperienceBlock::new)
                 .initialProperties(() -> Blocks.STONE)
-                .properties(p -> p.strength(3.0F).color(color))
+                .properties(p -> p.strength(3.0F).mapColor(color))
                 .loot((loot, block) -> loot.add(block,
                         createSilkTouchDispatchTable(block,
                                 applyExplosionDecay(block, lootTableItem(gem.get())
@@ -208,24 +207,24 @@ public class TropicraftBlocks {
                 .simpleItem();
     }
 
-    public static final BlockEntry<Block> AZURITE_BLOCK = oreStorageBlock("azurite_block", MaterialColor.COLOR_LIGHT_BLUE, TropicraftItems.AZURITE)
+    public static final BlockEntry<Block> AZURITE_BLOCK = oreStorageBlock("azurite_block", MapColor.COLOR_LIGHT_BLUE, TropicraftItems.AZURITE)
             .tag(BlockTags.NEEDS_IRON_TOOL)
             .register();
-    public static final BlockEntry<Block> EUDIALYTE_BLOCK = oreStorageBlock("eudialyte_block", MaterialColor.COLOR_PINK, TropicraftItems.EUDIALYTE)
+    public static final BlockEntry<Block> EUDIALYTE_BLOCK = oreStorageBlock("eudialyte_block", MapColor.COLOR_PINK, TropicraftItems.EUDIALYTE)
             .tag(BlockTags.NEEDS_IRON_TOOL)
             .register();
-    public static final BlockEntry<Block> MANGANESE_BLOCK = oreStorageBlock("manganese_block", MaterialColor.COLOR_PURPLE, TropicraftItems.MANGANESE)
+    public static final BlockEntry<Block> MANGANESE_BLOCK = oreStorageBlock("manganese_block", MapColor.COLOR_PURPLE, TropicraftItems.MANGANESE)
             .tag(BlockTags.NEEDS_IRON_TOOL)
             .register();
-    public static final BlockEntry<Block> SHAKA_BLOCK = oreStorageBlock("shaka_block", MaterialColor.COLOR_BLUE, TropicraftItems.SHAKA)
+    public static final BlockEntry<Block> SHAKA_BLOCK = oreStorageBlock("shaka_block", MapColor.COLOR_BLUE, TropicraftItems.SHAKA)
             .tag(BlockTags.NEEDS_IRON_TOOL)
             .register();
-    public static final BlockEntry<Block> ZIRCON_BLOCK = oreStorageBlock("zircon_block", MaterialColor.COLOR_RED, TropicraftItems.ZIRCON)
+    public static final BlockEntry<Block> ZIRCON_BLOCK = oreStorageBlock("zircon_block", MapColor.COLOR_RED, TropicraftItems.ZIRCON)
             .tag(BlockTags.NEEDS_IRON_TOOL)
             .register();
-    public static final BlockEntry<Block> ZIRCONIUM_BLOCK = oreStorageBlock("zirconium_block", MaterialColor.COLOR_PINK, TropicraftItems.ZIRCONIUM).register();
+    public static final BlockEntry<Block> ZIRCONIUM_BLOCK = oreStorageBlock("zirconium_block", MapColor.COLOR_PINK, TropicraftItems.ZIRCONIUM).register();
 
-    private static BlockBuilder<Block, Registrate> oreStorageBlock(String name, MaterialColor color, ItemEntry<Item> ingredient) {
+    private static BlockBuilder<Block, Registrate> oreStorageBlock(String name, MapColor color, ItemEntry<Item> ingredient) {
         return REGISTRATE.block(name, Block::new)
                 .initialProperties(Material.METAL, color)
                 .properties(p -> p.sound(SoundType.METAL).destroyTime(5.0F).explosionResistance(6.0F))
@@ -259,7 +258,7 @@ public class TropicraftBlocks {
             }));
 
     public static final BlockEntry<BlockTropicraftSand> PURIFIED_SAND = REGISTRATE.block("purified_sand", BlockTropicraftSand::new)
-            .initialProperties(Material.SAND, MaterialColor.SAND)
+            .initialProperties(Material.SAND, MapColor.SAND)
             .properties(p -> p.strength(0.5F).explosionResistance(0.5F).sound(SoundType.SAND))
             .tag(BlockTags.SAND, BlockTags.MINEABLE_WITH_SHOVEL, TropicraftTags.Blocks.CARVER_REPLACEABLES)
             .blockstate((ctx, prov) -> {
@@ -284,7 +283,7 @@ public class TropicraftBlocks {
             .register();
 
     public static final BlockEntry<Block> PACKED_PURIFIED_SAND = REGISTRATE.block("packed_purified_sand", Block::new)
-            .initialProperties(Material.STONE, MaterialColor.SAND)
+            .initialProperties(Material.STONE, MapColor.SAND)
             .properties(p -> p.strength(0.8F).explosionResistance(0.8F).requiresCorrectToolForDrops())
             .blockstate(TropicraftBlocks::simpleBlockAllRotations)
             .tag(BlockTags.SAND, BlockTags.MINEABLE_WITH_SHOVEL, TropicraftTags.Blocks.CARVER_REPLACEABLES)
@@ -299,7 +298,7 @@ public class TropicraftBlocks {
             .register();
 
     public static final BlockEntry<BlockTropicraftSand> CORAL_SAND = REGISTRATE.block("coral_sand", BlockTropicraftSand::new)
-            .initialProperties(Material.SAND, MaterialColor.COLOR_PINK)
+            .initialProperties(Material.SAND, MapColor.COLOR_PINK)
             .properties(p -> p.strength(0.5F).sound(SoundType.SAND))
             .blockstate(TropicraftBlocks::simpleBlockAllRotations)
             .tag(BlockTags.SAND, BlockTags.MINEABLE_WITH_SHOVEL, TropicraftTags.Blocks.CARVER_REPLACEABLES)
@@ -309,7 +308,7 @@ public class TropicraftBlocks {
             .register();
 
     public static final BlockEntry<BlockTropicraftSand> FOAMY_SAND = REGISTRATE.block("foamy_sand", BlockTropicraftSand::new)
-            .initialProperties(Material.SAND, MaterialColor.COLOR_GREEN)
+            .initialProperties(Material.SAND, MapColor.COLOR_GREEN)
             .properties(p -> p.strength(0.5F).sound(SoundType.SAND))
             .blockstate(TropicraftBlocks::simpleBlockAllRotations)
             .tag(BlockTags.SAND, BlockTags.MINEABLE_WITH_SHOVEL, TropicraftTags.Blocks.CARVER_REPLACEABLES)
@@ -319,7 +318,7 @@ public class TropicraftBlocks {
             .register();
 
     public static final BlockEntry<VolcanicSandBlock> VOLCANIC_SAND = REGISTRATE.block("volcanic_sand", VolcanicSandBlock::new)
-            .initialProperties(Material.SAND, MaterialColor.COLOR_LIGHT_GRAY)
+            .initialProperties(Material.SAND, MapColor.COLOR_LIGHT_GRAY)
             .properties(p -> p.strength(0.5F).sound(SoundType.SAND))
             .blockstate(TropicraftBlocks::simpleBlockAllRotations)
             .tag(BlockTags.SAND, BlockTags.MINEABLE_WITH_SHOVEL, TropicraftTags.Blocks.CARVER_REPLACEABLES)
@@ -329,7 +328,7 @@ public class TropicraftBlocks {
             .register();
 
     public static final BlockEntry<BlockTropicraftSand> MINERAL_SAND = REGISTRATE.block("mineral_sand", BlockTropicraftSand::new)
-            .initialProperties(Material.SAND, MaterialColor.SAND)
+            .initialProperties(Material.SAND, MapColor.SAND)
             .properties(p -> p.strength(0.5F).sound(SoundType.SAND))
             .blockstate((ctx, prov) -> prov.simpleBlock(
                     ctx.get(), ConfiguredModel.allRotations(prov.cubeAll(ctx.get()), false)
@@ -376,7 +375,7 @@ public class TropicraftBlocks {
             .register();
 
     public static final BlockEntry<RotatedPillarBlock> BAMBOO_BUNDLE = REGISTRATE.block("bamboo_bundle", RotatedPillarBlock::new)
-            .initialProperties(Material.GRASS, MaterialColor.PLANT)
+            .initialProperties(Material.GRASS, MapColor.PLANT)
             .properties(p -> p.sound(SoundType.BAMBOO).strength(0.2F, 5.0F))
             .blockstate((ctx, prov) -> prov.axisBlock(ctx.get(), prov.modLoc("block/bamboo")))
             .recipe((ctx, prov) -> prov.singleItem(DataIngredient.items(Items.BAMBOO), ctx, 9, 1))
@@ -384,22 +383,22 @@ public class TropicraftBlocks {
             .register();
 
     public static final BlockEntry<RotatedPillarBlock> THATCH_BUNDLE = REGISTRATE.block("thatch_bundle", RotatedPillarBlock::new)
-            .initialProperties(Material.BAMBOO, MaterialColor.PLANT)
+            .initialProperties(Material.BAMBOO, MapColor.PLANT)
             .properties(p -> p.sound(SoundType.BAMBOO).strength(0.2F, 5.0F))
             .blockstate((ctx, prov) -> prov.axisBlock(ctx.get(), prov.modLoc("block/thatch")))
             .recipe((ctx, prov) -> prov.singleItem(DataIngredient.items(Items.SUGAR_CANE), ctx, 9, 1))
             .simpleItem()
             .register();
 
-    public static final BlockEntry<Block> MAHOGANY_PLANKS = planks("mahogany_planks", MaterialColor.COLOR_BROWN, () -> DataIngredient.items(TropicraftBlocks.MAHOGANY_LOG.get())).register();
-    public static final BlockEntry<Block> PALM_PLANKS = planks("palm_planks", MaterialColor.COLOR_BROWN, () -> DataIngredient.items(TropicraftBlocks.PALM_LOG.get())).register();
+    public static final BlockEntry<Block> MAHOGANY_PLANKS = planks("mahogany_planks", MapColor.COLOR_BROWN, () -> DataIngredient.items(TropicraftBlocks.MAHOGANY_LOG.get())).register();
+    public static final BlockEntry<Block> PALM_PLANKS = planks("palm_planks", MapColor.COLOR_BROWN, () -> DataIngredient.items(TropicraftBlocks.PALM_LOG.get())).register();
 
-    public static final BlockEntry<RotatedPillarBlock> MAHOGANY_LOG = log("mahogany_log", MaterialColor.WOOD, MaterialColor.COLOR_BROWN).register();
-    public static final BlockEntry<RotatedPillarBlock> PALM_LOG = log("palm_log", MaterialColor.COLOR_GRAY, MaterialColor.COLOR_BROWN).register();
+    public static final BlockEntry<RotatedPillarBlock> MAHOGANY_LOG = log("mahogany_log", MapColor.WOOD, MapColor.COLOR_BROWN).register();
+    public static final BlockEntry<RotatedPillarBlock> PALM_LOG = log("palm_log", MapColor.COLOR_GRAY, MapColor.COLOR_BROWN).register();
 
     // TODO: fix this typo
-    public static final BlockEntry<RotatedPillarBlock> MAHOGANY_WOOD = wood("mohogany_wood", MaterialColor.WOOD, MAHOGANY_LOG).lang("Mahogany Wood").register();
-    public static final BlockEntry<RotatedPillarBlock> PALM_WOOD = wood("palm_wood", MaterialColor.COLOR_GRAY, PALM_LOG).register();
+    public static final BlockEntry<RotatedPillarBlock> MAHOGANY_WOOD = wood("mohogany_wood", MapColor.WOOD, MAHOGANY_LOG).lang("Mahogany Wood").register();
+    public static final BlockEntry<RotatedPillarBlock> PALM_WOOD = wood("palm_wood", MapColor.COLOR_GRAY, PALM_LOG).register();
 
     public static final BlockEntry<StairBlock> PALM_STAIRS = woodenStairs("palm_stairs", PALM_PLANKS).register();
     public static final BlockEntry<StairBlock> MAHOGANY_STAIRS = woodenStairs("mahogany_stairs", MAHOGANY_PLANKS).register();
@@ -487,30 +486,30 @@ public class TropicraftBlocks {
     public static final BlockEntry<LeavesBlock> PURPLE_FLOWERING_LEAVES = leaves("purple_flowering_leaves", true).register();
     public static final BlockEntry<LeavesBlock> YELLOW_FLOWERING_LEAVES = leaves("yellow_flowering_leaves", true).register();
 
-    public static final BlockEntry<RotatedPillarBlock> PAPAYA_LOG = log("papaya_log", MaterialColor.COLOR_GRAY, MaterialColor.COLOR_BROWN)
+    public static final BlockEntry<RotatedPillarBlock> PAPAYA_LOG = log("papaya_log", MapColor.COLOR_GRAY, MapColor.COLOR_BROWN)
             .recipe((ctx, prov) -> ShapelessRecipeBuilder.shapeless(Blocks.JUNGLE_LOG)
                     .requires(ctx.get())
                     .unlockedBy("has_papaya_log", has(ctx.get()))
                     .save(prov))
             .register();
-    public static final BlockEntry<RotatedPillarBlock> PAPAYA_WOOD = wood("papaya_wood", MaterialColor.COLOR_GRAY, PAPAYA_LOG).register();
+    public static final BlockEntry<RotatedPillarBlock> PAPAYA_WOOD = wood("papaya_wood", MapColor.COLOR_GRAY, PAPAYA_LOG).register();
 
-    public static final BlockEntry<RotatedPillarBlock> RED_MANGROVE_LOG = log("red_mangrove_log", MaterialColor.COLOR_GRAY, MaterialColor.COLOR_BROWN, () -> TropicraftBlocks.STRIPPED_MANGROVE_LOG.get())
+    public static final BlockEntry<RotatedPillarBlock> RED_MANGROVE_LOG = log("red_mangrove_log", MapColor.COLOR_GRAY, MapColor.COLOR_BROWN, () -> TropicraftBlocks.STRIPPED_MANGROVE_LOG.get())
             .item().tag(TropicraftTags.Items.MANGROVE_LOGS).build()
             .register();
-    public static final BlockEntry<RotatedPillarBlock> RED_MANGROVE_WOOD = wood("red_mangrove_wood", MaterialColor.COLOR_GRAY, RED_MANGROVE_LOG, () -> TropicraftBlocks.STRIPPED_MANGROVE_WOOD.get()).register();
+    public static final BlockEntry<RotatedPillarBlock> RED_MANGROVE_WOOD = wood("red_mangrove_wood", MapColor.COLOR_GRAY, RED_MANGROVE_LOG, () -> TropicraftBlocks.STRIPPED_MANGROVE_WOOD.get()).register();
     public static final BlockEntry<MangroveRootsBlock> RED_MANGROVE_ROOTS = mangroveRoots("red_mangrove_roots").register();
 
-    public static final BlockEntry<RotatedPillarBlock> LIGHT_MANGROVE_LOG = log("light_mangrove_log", MaterialColor.COLOR_GRAY, MaterialColor.COLOR_BROWN, () -> TropicraftBlocks.STRIPPED_MANGROVE_LOG.get())
+    public static final BlockEntry<RotatedPillarBlock> LIGHT_MANGROVE_LOG = log("light_mangrove_log", MapColor.COLOR_GRAY, MapColor.COLOR_BROWN, () -> TropicraftBlocks.STRIPPED_MANGROVE_LOG.get())
             .item().tag(TropicraftTags.Items.MANGROVE_LOGS).build()
             .register();
-    public static final BlockEntry<RotatedPillarBlock> LIGHT_MANGROVE_WOOD = wood("light_mangrove_wood", MaterialColor.COLOR_GRAY, LIGHT_MANGROVE_LOG, () -> TropicraftBlocks.STRIPPED_MANGROVE_WOOD.get()).register();
+    public static final BlockEntry<RotatedPillarBlock> LIGHT_MANGROVE_WOOD = wood("light_mangrove_wood", MapColor.COLOR_GRAY, LIGHT_MANGROVE_LOG, () -> TropicraftBlocks.STRIPPED_MANGROVE_WOOD.get()).register();
     public static final BlockEntry<MangroveRootsBlock> LIGHT_MANGROVE_ROOTS = mangroveRoots("light_mangrove_roots").register();
 
-    public static final BlockEntry<RotatedPillarBlock> BLACK_MANGROVE_LOG = log("black_mangrove_log", MaterialColor.COLOR_GRAY, MaterialColor.COLOR_BROWN, () -> TropicraftBlocks.STRIPPED_MANGROVE_LOG.get())
+    public static final BlockEntry<RotatedPillarBlock> BLACK_MANGROVE_LOG = log("black_mangrove_log", MapColor.COLOR_GRAY, MapColor.COLOR_BROWN, () -> TropicraftBlocks.STRIPPED_MANGROVE_LOG.get())
             .item().tag(TropicraftTags.Items.MANGROVE_LOGS).build()
             .register();
-    public static final BlockEntry<RotatedPillarBlock> BLACK_MANGROVE_WOOD = wood("black_mangrove_wood", MaterialColor.COLOR_GRAY, BLACK_MANGROVE_LOG, () -> TropicraftBlocks.STRIPPED_MANGROVE_WOOD.get()).register();
+    public static final BlockEntry<RotatedPillarBlock> BLACK_MANGROVE_WOOD = wood("black_mangrove_wood", MapColor.COLOR_GRAY, BLACK_MANGROVE_LOG, () -> TropicraftBlocks.STRIPPED_MANGROVE_WOOD.get()).register();
     public static final BlockEntry<MangroveRootsBlock> BLACK_MANGROVE_ROOTS = mangroveRoots("black_mangrove_roots").register();
 
     public static final BlockEntry<MangroveLeavesBlock> RED_MANGROVE_LEAVES = mangroveLeaves("red_mangrove_leaves", () -> TropicraftBlocks.RED_MANGROVE_PROPAGULE.get()).register();
@@ -523,10 +522,10 @@ public class TropicraftBlocks {
     public static final BlockEntry<PropaguleBlock> TEA_MANGROVE_PROPAGULE = propagule("tea_mangrove_propagule", TropicraftTrees.TEA_MANGROVE, "Pelliciera rhizophorae").register();
     public static final BlockEntry<PropaguleBlock> BLACK_MANGROVE_PROPAGULE = propagule("black_mangrove_propagule", TropicraftTrees.BLACK_MANGROVE, "Avicennia germinans").register();
 
-    public static final BlockEntry<RotatedPillarBlock> STRIPPED_MANGROVE_LOG = log("stripped_mangrove_log", MaterialColor.COLOR_RED, MaterialColor.COLOR_RED).register();
-    public static final BlockEntry<RotatedPillarBlock> STRIPPED_MANGROVE_WOOD = wood("stripped_mangrove_wood", MaterialColor.COLOR_RED, STRIPPED_MANGROVE_LOG).register();
+    public static final BlockEntry<RotatedPillarBlock> STRIPPED_MANGROVE_LOG = log("stripped_mangrove_log", MapColor.COLOR_RED, MapColor.COLOR_RED).register();
+    public static final BlockEntry<RotatedPillarBlock> STRIPPED_MANGROVE_WOOD = wood("stripped_mangrove_wood", MapColor.COLOR_RED, STRIPPED_MANGROVE_LOG).register();
 
-    public static final BlockEntry<Block> MANGROVE_PLANKS = planks("mangrove_planks", MaterialColor.COLOR_BROWN, () -> DataIngredient.items(TropicraftBlocks.LIGHT_MANGROVE_LOG, TropicraftBlocks.RED_MANGROVE_LOG, TropicraftBlocks.BLACK_MANGROVE_LOG)).register();
+    public static final BlockEntry<Block> MANGROVE_PLANKS = planks("mangrove_planks", MapColor.COLOR_BROWN, () -> DataIngredient.items(TropicraftBlocks.LIGHT_MANGROVE_LOG, TropicraftBlocks.RED_MANGROVE_LOG, TropicraftBlocks.BLACK_MANGROVE_LOG)).register();
     public static final BlockEntry<StairBlock> MANGROVE_STAIRS = woodenStairs("mangrove_stairs", MANGROVE_PLANKS).register();
     public static final BlockEntry<SlabBlock> MANGROVE_SLAB = woodenSlab("mangrove_slab", MANGROVE_PLANKS).register();
     public static final BlockEntry<FenceBlock> MANGROVE_FENCE = woodenFence("mangrove_fence", MANGROVE_PLANKS).register();
@@ -654,7 +653,7 @@ public class TropicraftBlocks {
 
     private static BlockBuilder<BongoDrumBlock, Registrate> bongoDrum(String name, BongoDrumBlock.Size size) {
         return REGISTRATE.block(name, p -> new BongoDrumBlock(size, p))
-                .initialProperties(Material.WOOD, MaterialColor.TERRACOTTA_WHITE)
+                .initialProperties(Material.WOOD, MapColor.TERRACOTTA_WHITE)
                 .properties(p -> p.strength(2.0F).sound(SoundType.WOOD))
                 .tag(TropicraftTags.Blocks.BONGOS)
                 .blockstate((ctx, prov) -> {
@@ -857,7 +856,7 @@ public class TropicraftBlocks {
             .register();
 
     public static final BlockEntry<CoffeeBushBlock> COFFEE_BUSH = REGISTRATE.block("coffee_bush", CoffeeBushBlock::new)
-            .initialProperties(Material.PLANT, MaterialColor.GRASS)
+            .initialProperties(Material.PLANT, MapColor.GRASS)
             .properties(p -> p.strength(0.15f).sound(SoundType.GRASS).noOcclusion())
             .loot((loot, block) -> loot.add(block, dropNumberOfItems(TropicraftBlocks.COFFEE_BUSH.get(), TropicraftItems.RAW_COFFEE_BEAN, 1, 3)))
             .addLayer(() -> RenderType::cutout)
@@ -1226,11 +1225,11 @@ public class TropicraftBlocks {
                     .build();
     }
 
-    private static BlockBuilder<RotatedPillarBlock, Registrate> log(String name, MaterialColor topColor, MaterialColor sideColor) {
+    private static BlockBuilder<RotatedPillarBlock, Registrate> log(String name, MapColor topColor, MapColor sideColor) {
         return log(name, topColor, sideColor, null);
     }
 
-    private static BlockBuilder<RotatedPillarBlock, Registrate> log(String name, MaterialColor topColor, MaterialColor sideColor, @Nullable Supplier<? extends RotatedPillarBlock> strippedLog) {
+    private static BlockBuilder<RotatedPillarBlock, Registrate> log(String name, MapColor topColor, MapColor sideColor, @Nullable Supplier<? extends RotatedPillarBlock> strippedLog) {
         return REGISTRATE.block(name, p -> strippedLog != null ? new TropicraftLogBlock(p, strippedLog) : new RotatedPillarBlock(p))
                 .properties(p -> rotatedPillarProperties(Material.WOOD, topColor, sideColor).strength(2.0F))
                 .tag(BlockTags.LOGS, BlockTags.LOGS_THAT_BURN, BlockTags.MINEABLE_WITH_AXE)
@@ -1240,11 +1239,11 @@ public class TropicraftBlocks {
                     .build();
     }
 
-    private static BlockBuilder<RotatedPillarBlock, Registrate> wood(String name, MaterialColor color, BlockEntry<? extends RotatedPillarBlock> bark) {
+    private static BlockBuilder<RotatedPillarBlock, Registrate> wood(String name, MapColor color, BlockEntry<? extends RotatedPillarBlock> bark) {
         return wood(name, color, bark, null);
     }
 
-    private static BlockBuilder<RotatedPillarBlock, Registrate> wood(String name, MaterialColor color, BlockEntry<? extends RotatedPillarBlock> bark, @Nullable Supplier<? extends RotatedPillarBlock> stripped) {
+    private static BlockBuilder<RotatedPillarBlock, Registrate> wood(String name, MapColor color, BlockEntry<? extends RotatedPillarBlock> bark, @Nullable Supplier<? extends RotatedPillarBlock> stripped) {
         return REGISTRATE.block(name, p -> stripped != null ? new TropicraftLogBlock(p, stripped) : new RotatedPillarBlock(p))
                 .initialProperties(Material.WOOD, color)
                 .properties(p -> p.strength(2.0F))
@@ -1366,10 +1365,10 @@ public class TropicraftBlocks {
                     .build();
     }
 
-    private static BlockBuilder<Block, Registrate> planks(String name, MaterialColor color, Supplier<DataIngredient> log) {
+    private static BlockBuilder<Block, Registrate> planks(String name, MapColor color, Supplier<DataIngredient> log) {
         return REGISTRATE.block(name, Block::new)
                 .initialProperties(() -> Blocks.OAK_PLANKS)
-                .properties(p -> p.color(color))
+                .properties(p -> p.mapColor(color))
                 .tag(BlockTags.PLANKS, BlockTags.MINEABLE_WITH_AXE)
                 .recipe((ctx, prov) -> prov.planks(log.get(), ctx))
                 .item()
@@ -1484,7 +1483,7 @@ public class TropicraftBlocks {
                     .build();
     }
 
-    private static Properties rotatedPillarProperties(Material material, MaterialColor topColor, MaterialColor sideColor) {
+    private static Properties rotatedPillarProperties(Material material, MapColor topColor, MapColor sideColor) {
         return Properties.of(material, state -> state.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y ? topColor : sideColor);
     }
 
@@ -1494,7 +1493,7 @@ public class TropicraftBlocks {
 
     private static LootPool.Builder droppingChunksPool(Block block, Supplier<? extends ItemLike> chunk) {
         return LootPool.lootPool().add(LootItem.lootTableItem(chunk.get())
-                .when(MatchSwordCondition.builder())
+                .when(MatchTool.toolMatches(ItemPredicate.Builder.item().of(ItemTags.SWORDS)))
                 .apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F)))
                 .otherwise(applyExplosionCondition(block, LootItem.lootTableItem(block))));
     }

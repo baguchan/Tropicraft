@@ -4,10 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.QuartPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.*;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -26,7 +25,7 @@ import java.util.stream.Stream;
 
 public class TropicraftBiomeSource extends BiomeSource {
     public static final Codec<TropicraftBiomeSource> CODEC = RecordCodecBuilder.create(i -> i.group(
-            RegistryOps.retrieveRegistry(Registry.BIOME_REGISTRY).forGetter(b -> b.biomes)
+            RegistryOps.retrieveRegistryLookup(Registries.BIOME).forGetter(b -> b.biomes)
     ).apply(i, i.stable(TropicraftBiomeSource::new)));
 
     private static final TropicraftBiomeBuilder DEBUG_BIOME_HOLDER = new TropicraftBiomeBuilder();
@@ -45,27 +44,30 @@ public class TropicraftBiomeSource extends BiomeSource {
             TropicraftBiomes.TROPICAL_PEAKS
     ).map(RegistryObject::getKey).collect(Collectors.toSet());
 
-    private final Registry<Biome> biomes;
+    private final HolderLookup.RegistryLookup<Biome> biomes;
     private final Climate.ParameterList<Holder<Biome>> parameters;
 
-    public TropicraftBiomeSource(Registry<Biome> biomes) {
-        super(POSSIBLE_BIOMES.stream().map(biomes::getHolderOrThrow));
-
+    public TropicraftBiomeSource(HolderLookup.RegistryLookup<Biome> biomes) {
         this.biomes = biomes;
 
         ImmutableList.Builder<Pair<Climate.ParameterPoint, Holder<Biome>>> builder = ImmutableList.builder();
-        new TropicraftBiomeBuilder().addBiomes((point, biome) -> builder.add(Pair.of(point, biomes.getHolderOrThrow(biome.getKey()))));
+        new TropicraftBiomeBuilder().addBiomes((point, biome) -> builder.add(Pair.of(point, biomes.getOrThrow(biome.getKey()))));
 
         parameters = new Climate.ParameterList<>(builder.build());
     }
 
     public static void register() {
-        Registry.register(Registry.BIOME_SOURCE, new ResourceLocation(Constants.MODID, "tropics"), CODEC);
+        Registry.register(BuiltInRegistries.BIOME_SOURCE, new ResourceLocation(Constants.MODID, "tropics"), CODEC);
     }
 
     @Override
     protected Codec<? extends BiomeSource> codec() {
         return CODEC;
+    }
+
+    @Override
+    protected Stream<Holder<Biome>> collectPossibleBiomes() {
+        return POSSIBLE_BIOMES.stream().map(biomes::getOrThrow);
     }
 
     @Override

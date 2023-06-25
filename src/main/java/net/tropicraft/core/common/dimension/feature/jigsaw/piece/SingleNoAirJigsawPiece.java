@@ -30,10 +30,6 @@ public class SingleNoAirJigsawPiece extends SinglePoolElement {
         this.unprojected = unproject;
     }
 
-    public SingleNoAirJigsawPiece(StructureTemplate template) {
-        super(template);
-    }
-
     public static Function<StructureTemplatePool.Projection, SingleNoAirJigsawPiece> create(String id, Holder<StructureProcessorList> processors, boolean unprojected) {
         return placementBehaviour -> new SingleNoAirJigsawPiece(Either.left(new ResourceLocation(id)), processors, placementBehaviour, unprojected);
     }

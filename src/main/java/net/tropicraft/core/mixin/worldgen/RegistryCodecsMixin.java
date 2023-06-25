@@ -6,6 +6,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -40,16 +41,15 @@ public class RegistryCodecsMixin<E> {
             return;
         }
         LevelStem dimension = TropicraftDimension.createDimension(
-                registryOrThrow(ops, Registry.DIMENSION_TYPE_REGISTRY),
-                registryOrThrow(ops, Registry.STRUCTURE_SET_REGISTRY),
-                registryOrThrow(ops, Registry.BIOME_REGISTRY),
-                registryOrThrow(ops, Registry.NOISE_GENERATOR_SETTINGS_REGISTRY),
-                registryOrThrow(ops, Registry.NOISE_REGISTRY)
+                registryOrThrow(ops, Registries.DIMENSION_TYPE),
+                registryOrThrow(ops, Registries.BIOME),
+                registryOrThrow(ops, Registries.NOISE_SETTINGS),
+                registryOrThrow(ops, Registries.NOISE)
         );
         registry.registerOrOverride(OptionalInt.empty(), TropicraftDimension.DIMENSION, dimension, Lifecycle.stable());
     }
 
     private static <T> Registry<T> registryOrThrow(RegistryOps<?> ops, ResourceKey<Registry<T>> key) {
-        return ops.registry(key).orElseThrow(() -> new IllegalArgumentException("Missing registry for " + key));
+        return ops.getter(key).orElseThrow(() -> new IllegalArgumentException("Missing registry for " + key));
     }
 }

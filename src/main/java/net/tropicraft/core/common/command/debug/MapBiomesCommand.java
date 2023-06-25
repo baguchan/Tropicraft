@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
@@ -57,11 +58,12 @@ public class MapBiomesCommand {
 
         BufferedImage img = new BufferedImage(SIZE, SIZE, BufferedImage.TYPE_INT_RGB);
 
-        Optional<? extends Registry<Biome>> biomes = source.getLevel().registryAccess().registry(Registry.BIOME_REGISTRY);
+        Optional<? extends Registry<Biome>> biomes = source.getLevel().registryAccess().registry(Registries.BIOME);
         if (biomes.isPresent()) {
             for (int x = -SIZE2; x < SIZE2; x++) {
                 if (x % SIZE8 == 0) {
-                    source.sendSuccess(Component.literal(((x + SIZE2) / (double) SIZE) * 100 + "%"), false);
+                    double progress = (x + SIZE2) / (double) SIZE;
+                    source.sendSuccess(() -> Component.literal(progress * 100 + "%"), false);
                 }
 
                 for (int z = -SIZE2; z < SIZE2; z++) {
@@ -78,7 +80,7 @@ public class MapBiomesCommand {
         Path p = Paths.get("biome_colors.png");
         try {
             ImageIO.write(img, "png", p.toAbsolutePath().toFile());
-            source.sendSuccess(Component.literal("Mapped biome colors!"), false);
+            source.sendSuccess(() -> Component.literal("Mapped biome colors!"), false);
         } catch (IOException e) {
             source.sendFailure(Component.literal("Something went wrong, check the log!"));
             e.printStackTrace();

@@ -3,7 +3,7 @@ package net.tropicraft.core.common.dimension.biome;
 import com.tterrag.registrate.Registrate;
 import com.tterrag.registrate.providers.ProviderType;
 import com.tterrag.registrate.providers.RegistrateLangProvider;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BiomeDefaultFeatures;
 import net.minecraft.data.worldgen.placement.AquaticPlacements;
 import net.minecraft.data.worldgen.placement.VegetationPlacements;
@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 public final class TropicraftBiomes {
     public static final Registrate REGISTRATE = Tropicraft.registrate();
 
-    public static final DeferredRegister<Biome> REGISTER = DeferredRegister.create(Registry.BIOME_REGISTRY, Constants.MODID);
+    public static final DeferredRegister<Biome> REGISTER = DeferredRegister.create(Registries.BIOME, Constants.MODID);
 
     public static final int TROPICS_WATER_COLOR = 0x4eecdf;
     public static final int TROPICS_WATER_FOG_COLOR = 0x041f33;

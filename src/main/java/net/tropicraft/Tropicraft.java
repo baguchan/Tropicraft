@@ -8,9 +8,8 @@ import com.tterrag.registrate.providers.ProviderType;
 import com.tterrag.registrate.providers.RegistrateTagsProvider;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -40,7 +39,6 @@ import net.tropicraft.core.client.data.TropicraftLangKeys;
 import net.tropicraft.core.common.block.TropicraftBlocks;
 import net.tropicraft.core.common.command.TropicraftCommands;
 import net.tropicraft.core.common.command.debug.MapBiomesCommand;
-import net.tropicraft.core.common.data.loot.TropicraftLootConditions;
 import net.tropicraft.core.common.dimension.TropicraftDimension;
 import net.tropicraft.core.common.dimension.biome.TropicraftBiomeSource;
 import net.tropicraft.core.common.dimension.biome.TropicraftBiomes;
@@ -67,17 +65,10 @@ import java.util.regex.Pattern;
 
 @Mod(Constants.MODID)
 public class Tropicraft {
-    public static final CreativeModeTab TROPICRAFT_ITEM_GROUP = (new CreativeModeTab("tropicraft") {
-        @Override
-        public ItemStack makeIcon() {
-            return new ItemStack(TropicraftBlocks.PALM_SAPLING.get());
-        }
-    });
-
-    public static final ProviderType<RegistrateTagsProvider<Biome>> BIOME_TAGS = ProviderType.register("tags/biome", type -> (p, e) -> new RegistrateTagsProvider<>(p, type, "biome", e.getGenerator(), BuiltinRegistries.BIOME, e.getExistingFileHelper()));
+    public static final ProviderType<RegistrateTagsProvider.Impl<Biome>> BIOME_TAGS = ProviderType.register("tags/biome", type -> (p, e) -> new RegistrateTagsProvider.Impl<>(p, type, "biome", e.getGenerator().getPackOutput(), Registries.BIOME, e.getLookupProvider(), e.getExistingFileHelper()));
 
     private static final NonNullLazy<Registrate> REGISTRATE = NonNullLazy.of(() -> Registrate.create(Constants.MODID)
-            .creativeModeTab(() -> TROPICRAFT_ITEM_GROUP, "Tropicraft")
+            .defaultCreativeTab(builder -> builder.icon(() -> new ItemStack(TropicraftBlocks.PALM_SAPLING.get()))).build()
             .addDataGenerator(ProviderType.LANG, prov -> {
                 prov.add("attribute.name." + ForgeMod.SWIM_SPEED.getId().getPath(), "Swim Speed");
                 TropicraftLangKeys.generate(prov);
@@ -177,8 +168,7 @@ public class Tropicraft {
                 StructureVoidProcessor.class,
                 TropicraftTrunkPlacers.class,
                 TropicraftFoliagePlacers.class,
-                TropicraftTreeDecorators.class,
-                TropicraftLootConditions.class
+                TropicraftTreeDecorators.class
         );
     }
 

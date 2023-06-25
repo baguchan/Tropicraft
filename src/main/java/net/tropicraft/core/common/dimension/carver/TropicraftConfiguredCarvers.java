@@ -1,6 +1,7 @@
 package net.tropicraft.core.common.dimension.carver;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.valueproviders.ConstantFloat;
 import net.minecraft.util.valueproviders.TrapezoidFloat;
 import net.minecraft.util.valueproviders.UniformFloat;
@@ -24,7 +25,7 @@ public final class TropicraftConfiguredCarvers {
                     BiasedToBottomHeight.of(VerticalAnchor.absolute(0), VerticalAnchor.absolute(240), 8),
                     ConstantFloat.of(0.5F),
                     VerticalAnchor.aboveBottom(10),
-                    Registry.BLOCK.getOrCreateTag(TropicraftTags.Blocks.CARVER_REPLACEABLES),
+                    BuiltInRegistries.BLOCK.getOrCreateTag(TropicraftTags.Blocks.CARVER_REPLACEABLES),
                     ConstantFloat.of(1.0F),
                     ConstantFloat.of(1.0F),
                     ConstantFloat.of(-0.7F)
@@ -38,7 +39,7 @@ public final class TropicraftConfiguredCarvers {
                     ConstantFloat.of(3.0F),
                     VerticalAnchor.aboveBottom(10),
                     CarverDebugSettings.of(false, Blocks.WARPED_BUTTON.defaultBlockState()),
-                    Registry.BLOCK.getOrCreateTag(TropicraftTags.Blocks.CARVER_REPLACEABLES),
+                    BuiltInRegistries.BLOCK.getOrCreateTag(TropicraftTags.Blocks.CARVER_REPLACEABLES),
                     UniformFloat.of(-0.125F, 0.125F),
                     new CanyonCarverConfiguration.CanyonShapeConfiguration(
                             UniformFloat.of(0.75F, 1.0F),
